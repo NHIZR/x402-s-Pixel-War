@@ -18,7 +18,9 @@
       "Bash(lsof:*)",
       "Bash(xargs kill:*)",
       "Bash(curl:*)",
-      "Bash(node -e:*)"
+      "Bash(node -e:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
