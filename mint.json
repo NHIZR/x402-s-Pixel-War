@@ -1,0 +1,123 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "x402's Pixel War",
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#8B5CF6",
+    "light": "#A78BFA",
+    "dark": "#6D28D9",
+    "anchors": {
+      "from": "#8B5CF6",
+      "to": "#EC4899"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "Play Game",
+      "url": "https://x402-pixel-war.vercel.app"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "GitHub",
+    "url": "https://github.com/yourusername/x402-pixel-war"
+  },
+  "tabs": [
+    {
+      "name": "API Reference",
+      "url": "api-reference"
+    },
+    {
+      "name": "Guides",
+      "url": "guides"
+    }
+  ],
+  "anchors": [
+    {
+      "name": "Demo",
+      "icon": "play",
+      "url": "https://x402-pixel-war.vercel.app"
+    },
+    {
+      "name": "Community",
+      "icon": "discord",
+      "url": "https://discord.gg/your-discord"
+    },
+    {
+      "name": "GitHub",
+      "icon": "github",
+      "url": "https://github.com/yourusername/x402-pixel-war"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Getting Started",
+      "pages": [
+        "introduction",
+        "quickstart",
+        "wallet-setup"
+      ]
+    },
+    {
+      "group": "User Guide",
+      "pages": [
+        "guides/overview",
+        "guides/basic-operations",
+        "guides/advanced-features",
+        "guides/economics",
+        "guides/strategies"
+      ]
+    },
+    {
+      "group": "API Reference",
+      "pages": [
+        "api-reference/introduction",
+        "api-reference/authentication"
+      ]
+    },
+    {
+      "group": "Pixel Conquest",
+      "pages": [
+        "api-reference/conquer-pixel",
+        "api-reference/conquer-batch",
+        "api-reference/recolor-pixel",
+        "api-reference/recolor-batch"
+      ]
+    },
+    {
+      "group": "Data Queries",
+      "pages": [
+        "api-reference/get-grid",
+        "api-reference/get-wallet-pixels",
+        "api-reference/get-user-stats"
+      ]
+    },
+    {
+      "group": "Development",
+      "pages": [
+        "development/architecture",
+        "development/deployment",
+        "development/database-setup",
+        "development/contributing"
+      ]
+    }
+  ],
+  "footerSocials": {
+    "twitter": "https://twitter.com/x402PixelWar",
+    "github": "https://github.com/yourusername/x402-pixel-war",
+    "discord": "https://discord.gg/your-discord"
+  },
+  "analytics": {
+    "ga4": {
+      "measurementId": "G-XXXXXXXXXX"
+    }
+  },
+  "feedback": {
+    "thumbsRating": true,
+    "suggestEdit": true,
+    "raiseIssue": true
+  }
+}

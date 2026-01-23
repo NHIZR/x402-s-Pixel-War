@@ -1,0 +1,336 @@
+---
+title: 'API Introduction'
+description: 'Complete API reference for x402 Pixel War Supabase RPC functions'
+icon: 'code'
+---
+
+## Overview
+
+x402's Pixel War provides a comprehensive set of **Supabase RPC functions** for pixel conquest, recoloring, and data queries. All functions are designed to be:
+
+- ⚡ **Fast**: < 200ms response time
+- 🔒 **Secure**: Row-level security policies
+- 🔁 **Atomic**: Transaction-based operations
+- 📊 **Type-safe**: Structured JSON responses
+
+## Authentication
+
+<Info>
+  All API calls use **Solana wallet addresses** as identity. No additional authentication tokens required.
+</Info>
+
+**Security Mechanisms:**
+- Wallet address verification
+- PostgreSQL Row Level Security (RLS)
+- Frontend wallet signature validation
+
+```typescript
+// Example: Using Supabase client
+import { supabase } from '@/lib/supabase/client';
+
+const { data, error } = await supabase.rpc('conquer_pixel_wallet', {
+  p_pixel_x: 10,
+  p_pixel_y: 5,
+  p_wallet_address: walletAddress,
+  p_new_color: '#FF0000',
+  p_tx_hash: transactionHash
+});
+```
+
+## API Categories
+
+<CardGroup cols={2}>
+  <Card
+    title="Pixel Conquest"
+    icon="flag"
+    href="/api-reference/conquer-pixel"
+  >
+    Single and batch pixel conquest operations
+  </Card>
+  <Card
+    title="Pixel Recoloring"
+    icon="palette"
+    href="/api-reference/recolor-pixel"
+  >
+    Free recoloring for owned pixels
+  </Card>
+  <Card
+    title="Data Queries"
+    icon="database"
+    href="/api-reference/get-grid"
+  >
+    Fetch grid state and user statistics
+  </Card>
+  <Card
+    title="Authentication"
+    icon="key"
+    href="/api-reference/authentication"
+  >
+    Wallet-based authentication guide
+  </Card>
+</CardGroup>
+
+## Quick Reference
+
+### Conquest Operations
+
+| Function | Description | Response Time |
+|----------|-------------|---------------|
+| [`conquer_pixel_wallet`](/api-reference/conquer-pixel) | Conquer single pixel | ~150ms |
+| [`conquer_pixels_batch`](/api-reference/conquer-batch) | Conquer multiple pixels | ~400ms (10 pixels) |
+
+### Recolor Operations
+
+| Function | Description | Cost |
+|----------|-------------|------|
+| [`recolor_pixel_wallet`](/api-reference/recolor-pixel) | Recolor single pixel | **Free** |
+| [`recolor_pixels_batch`](/api-reference/recolor-batch) | Recolor multiple pixels | **Free** |
+
+### Query Operations
+
+| Function | Description | Returns |
+|----------|-------------|---------|
+| [`get_grid_state_wallet`](/api-reference/get-grid) | Get all 1,500 pixels | Array of pixels |
+| [`get_wallet_pixels`](/api-reference/get-wallet-pixels) | Get user's pixels | Filtered array |
+| [`get_user_stats`](/api-reference/get-user-stats) | Get user statistics | Stats object |
+
+## Response Format
+
+All RPC functions return **JSONB** format for flexibility:
+
+<CodeGroup>
+```json Success Response
+{
+  "success": true,
+  "pixel": {
+    "x": 10,
+    "y": 5,
+    "color": "#FF0000",
+    "newPrice": 0.012
+  },
+  "transaction": {
+    "pricePaid": 0.01,
+    "newPrice": 0.012,
+    "txHash": "abc123..."
+  }
+}
+```
+
+```json Error Response
+{
+  "success": false,
+  "error": "Insufficient balance"
+}
+```
+
+```json Skipped Response (Owned Pixel)
+{
+  "success": true,
+  "skipped": true,
+  "reason": "Already owned",
+  "pixel": {
+    "x": 10,
+    "y": 5,
+    "color": "#FF0000"
+  }
+}
+```
+</CodeGroup>
+
+## Data Models
+
+### Pixel Object
+
+```typescript
+interface Pixel {
+  id: string;              // UUID
+  x: number;               // 0-49
+  y: number;               // 0-29
+  color: string;           // HEX color code
+  currentPrice: number;    // USDC
+  walletOwner: string | null;
+  conquestCount: number;   // Times conquered
+  lastConqueredAt: string | null;  // ISO timestamp
+}
+```
+
+### Transaction Object
+
+```typescript
+interface Transaction {
+  pricePaid: number;       // Amount paid in USDC
+  newPrice: number;        // New price after conquest
+  txHash: string;          // Blockchain transaction hash
+  previousOwner?: string;  // Previous owner wallet
+}
+```
+
+## Rate Limits
+
+<Warning>
+  Current version has no rate limits, but follow these best practices:
+</Warning>
+
+**Recommendations:**
+- Batch operations: Max 200 pixels per request
+- Single operations: Min 100ms interval
+- Avoid rapid-fire requests
+
+## Error Handling
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    try {
+      const result = await supabase.rpc('conquer_pixel_wallet', params);
+
+      if (!result.data.success) {
+        throw new Error(result.data.error);
+      }
+
+      if (result.data.skipped) {
+        console.log('Pixel already owned');
+      } else {
+        console.log('Conquest successful!');
+      }
+    } catch (error) {
+      console.error('Conquest failed:', error.message);
+      // Handle specific errors
+      if (error.message.includes('balance')) {
+        showTopUpModal();
+      }
+    }
+    ```
+  </Tab>
+
+  <Tab title="Common Errors">
+    | Error Message | Cause | Solution |
+    |---------------|-------|----------|
+    | `Pixel not found` | Invalid coordinates | Check x (0-49), y (0-29) |
+    | `Not pixel owner` | Recoloring others' pixels | Only recolor owned pixels |
+    | `Invalid color format` | Wrong color format | Use HEX: `#RRGGBB` |
+    | `Insufficient balance` | Not enough USDC | Top up wallet |
+  </Tab>
+</Tabs>
+
+## Testing
+
+<Steps>
+  <Step title="Use Devnet">
+    Test all functions on Solana Devnet with free tokens
+  </Step>
+  <Step title="Get Test Tokens">
+    Use faucets for test SOL and USDC
+  </Step>
+  <Step title="Try Single Conquest">
+    Start with `conquer_pixel_wallet` for a single pixel
+  </Step>
+  <Step title="Test Batch Operations">
+    Try `conquer_pixels_batch` with 5-10 pixels
+  </Step>
+  <Step title="Verify Results">
+    Use `get_grid_state_wallet` to check updates
+  </Step>
+</Steps>
+
+## Real-time Updates
+
+<Info>
+  All pixel updates are broadcast via **Supabase Realtime** (WebSocket).
+</Info>
+
+Subscribe to pixel changes:
+
+```typescript
+const channel = supabase
+  .channel('pixels-changes')
+  .on('postgres_changes', {
+    event: 'UPDATE',
+    schema: 'public',
+    table: 'pixels',
+  }, (payload) => {
+    console.log('Pixel updated:', payload.new);
+    // Update your UI
+  })
+  .subscribe();
+```
+
+## SDK Support
+
+<CardGroup cols={2}>
+  <Card
+    title="JavaScript/TypeScript"
+    icon="js"
+  >
+    Official Supabase JS client
+    ```bash
+    npm install @supabase/supabase-js
+    ```
+  </Card>
+  <Card
+    title="Python"
+    icon="python"
+  >
+    Community Supabase Python client
+    ```bash
+    pip install supabase
+    ```
+  </Card>
+</CardGroup>
+
+## API Endpoints
+
+<Tabs>
+  <Tab title="Conquest">
+    - [`conquer_pixel_wallet()`](/api-reference/conquer-pixel)
+    - [`conquer_pixels_batch()`](/api-reference/conquer-batch)
+  </Tab>
+  <Tab title="Recolor">
+    - [`recolor_pixel_wallet()`](/api-reference/recolor-pixel)
+    - [`recolor_pixels_batch()`](/api-reference/recolor-batch)
+  </Tab>
+  <Tab title="Queries">
+    - [`get_grid_state_wallet()`](/api-reference/get-grid)
+    - [`get_wallet_pixels()`](/api-reference/get-wallet-pixels)
+    - [`get_user_stats()`](/api-reference/get-user-stats)
+  </Tab>
+</Tabs>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card
+    title="Conquer Pixel"
+    icon="flag"
+    href="/api-reference/conquer-pixel"
+  >
+    Learn single pixel conquest
+  </Card>
+  <Card
+    title="Batch Conquest"
+    icon="layer-group"
+    href="/api-reference/conquer-batch"
+  >
+    Conquer multiple pixels at once
+  </Card>
+  <Card
+    title="Get Grid State"
+    icon="grid"
+    href="/api-reference/get-grid"
+  >
+    Query the entire grid
+  </Card>
+  <Card
+    title="User Statistics"
+    icon="chart-bar"
+    href="/api-reference/get-user-stats"
+  >
+    Get player stats
+  </Card>
+</CardGroup>
+
+---
+
+<Check>
+  **Ready to integrate?** Start with the [Conquest API](/api-reference/conquer-pixel) →
+</Check>

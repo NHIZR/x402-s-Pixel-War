@@ -1,0 +1,293 @@
+---
+title: 'Quick Start'
+description: 'Start playing x402 Pixel War in under 5 minutes'
+icon: 'rocket'
+---
+
+## Get Started in 5 Minutes
+
+Follow these simple steps to start conquering pixels!
+
+<Steps>
+  <Step title="Install a Solana Wallet">
+    Choose one of these popular wallets:
+
+    <Tabs>
+      <Tab title="Phantom (Recommended)">
+        1. Visit [phantom.app](https://phantom.app/)
+        2. Click "Download" for your browser
+        3. Install the extension
+        4. Create a new wallet
+        5. **Save your seed phrase securely!**
+      </Tab>
+      <Tab title="Solflare">
+        1. Visit [solflare.com](https://solflare.com/)
+        2. Download browser extension
+        3. Set up your wallet
+        4. Backup seed phrase
+      </Tab>
+      <Tab title="Torus">
+        1. Visit [tor.us](https://tor.us/)
+        2. Sign up with email/social
+        3. No seed phrase needed
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Switch to Devnet">
+    <Note>
+      **Devnet** is Solana's test network. Use it for free testing with fake tokens!
+    </Note>
+
+    **For Phantom:**
+    1. Open Phantom wallet
+    2. Click ⚙️ (Settings)
+    3. Developer Settings → Change Network
+    4. Select "Devnet"
+
+    <Frame>
+      <img src="/images/phantom-devnet.png" alt="Switch to Devnet" />
+    </Frame>
+  </Step>
+
+  <Step title="Get Test Tokens">
+    You need two types of tokens:
+
+    ### Get Test SOL (for transaction fees)
+    <CodeGroup>
+    ```bash Using Faucet Website
+    # Visit the official Solana faucet
+    https://faucet.solana.com/
+
+    # Paste your wallet address
+    # Click "Airdrop 1 SOL"
+    # Wait 5-10 seconds
+    ```
+
+    ```bash Using CLI (Optional)
+    solana airdrop 1 <YOUR_WALLET_ADDRESS> --url devnet
+    ```
+    </CodeGroup>
+
+    ### Get Test USDC
+    <Info>
+      Detailed instructions: [Wallet Setup Guide](/wallet-setup)
+    </Info>
+
+    Quick method:
+    1. Use a devnet USDC faucet
+    2. Or run our setup script:
+    ```bash
+    ./scripts/setup-test-usdc.sh
+    ```
+  </Step>
+
+  <Step title="Connect & Play">
+    1. Visit [x402-pixel-war.vercel.app](https://x402-pixel-war.vercel.app)
+    2. Click "Connect Wallet"
+    3. Select your wallet (Phantom/Solflare)
+    4. Approve the connection
+    5. Start conquering pixels! 🎮
+  </Step>
+</Steps>
+
+## Your First Conquest
+
+### Method 1: Single Pixel
+
+<Steps>
+  <Step title="Click a Pixel">
+    Click any pixel on the 50×30 grid
+  </Step>
+  <Step title="Choose Color">
+    Pick your favorite color from the color picker
+  </Step>
+  <Step title="Conquer">
+    Click "Conquer Pixel" button
+    - First pixel costs: **0.01 USDC**
+  </Step>
+  <Step title="Confirm">
+    Approve the transaction in your wallet
+  </Step>
+  <Step title="Success!">
+    You'll see: 🎉 **Conquest Successful!**
+  </Step>
+</Steps>
+
+### Method 2: Batch Conquest
+
+<Warning>
+  Batch operations are more efficient for creating pixel art!
+</Warning>
+
+<Steps>
+  <Step title="Enter Selection Mode">
+    Hold down `Shift` key
+  </Step>
+  <Step title="Select Pixels">
+    **Option A**: Click multiple pixels
+    **Option B**: Click and drag to select an area
+  </Step>
+  <Step title="Open Batch Modal">
+    Click "Batch Conquer" button at the bottom
+  </Step>
+  <Step title="Review & Confirm">
+    The modal shows:
+    - Total pixels selected
+    - Pixels you can conquer (excluding owned)
+    - Total cost
+  </Step>
+  <Step title="Choose Color & Conquer">
+    Pick a color and click "Confirm"
+  </Step>
+</Steps>
+
+## Understanding the Interface
+
+<Tabs>
+  <Tab title="Top Bar">
+    ```
+    ┌─────────────────────────────────────────┐
+    │ 🎮 x402's Pixel War  [Address] [Balance]│
+    └─────────────────────────────────────────┘
+    ```
+    - **Wallet Address**: Your connected wallet (shortened)
+    - **Balance**: Your available USDC balance
+    - **Connect/Disconnect**: Wallet connection button
+  </Tab>
+
+  <Tab title="Pixel Grid">
+    ```
+    ┌─────────────────────────┐
+    │  ▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪  │
+    │  ▪▪▪▪🔴▪▪▪▪🔵▪▪▪▪▪▪▪▪  │
+    │  ▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪  │
+    │  ▪▪🟢🟢🟢▪▪▪▪▪▪▪▪▪▪▪▪  │
+    └─────────────────────────┘
+    ```
+    - **Gray**: Unclaimed pixels
+    - **Colored**: Owned pixels
+    - **Hover**: Shows coordinate & price
+  </Tab>
+
+  <Tab title="Bottom Bar">
+    ```
+    ┌─────────────────────────────────────────┐
+    │  Selected: 5 pixels   [Batch Conquer]  │
+    └─────────────────────────────────────────┘
+    ```
+    - **Selected Count**: Number of pixels selected
+    - **Batch Button**: Opens batch conquest modal
+  </Tab>
+</Tabs>
+
+## Tips for Beginners
+
+<AccordionGroup>
+  <Accordion icon="lightbulb" title="Start with Cheap Pixels">
+    Gray (unclaimed) pixels cost only **0.01 USDC**. Perfect for learning!
+  </Accordion>
+
+  <Accordion icon="palette" title="Create Simple Patterns">
+    Use batch selection to create:
+    - Horizontal lines
+    - Vertical lines
+    - Simple shapes (squares, letters)
+  </Accordion>
+
+  <Accordion icon="coins" title="Earn Your First Profit">
+    1. Conquer a few cheap pixels
+    2. Wait for someone to conquer them
+    3. You receive **110%** back (10% profit!)
+  </Accordion>
+
+  <Accordion icon="sync" title="Watch Real-time Updates">
+    Open the game in two browser windows to see instant synchronization when you make changes!
+  </Accordion>
+</AccordionGroup>
+
+## Common Issues
+
+<AccordionGroup>
+  <Accordion icon="circle-exclamation" title="Wallet Won't Connect">
+    **Solutions:**
+    1. Refresh the page
+    2. Check you're on Devnet
+    3. Disable conflicting extensions
+    4. Try a different browser
+  </Accordion>
+
+  <Accordion icon="circle-exclamation" title="Balance Shows 0">
+    **Solutions:**
+    1. Verify you have USDC (not just SOL)
+    2. Check you're on the correct network
+    3. Wait a few seconds for balance to load
+    4. Click the balance to refresh manually
+  </Accordion>
+
+  <Accordion icon="circle-exclamation" title="Transaction Failed">
+    **Common reasons:**
+    - Insufficient balance
+    - Network congestion
+    - Wallet rejected transaction
+
+    **Solution:** Try again or check your balance
+  </Accordion>
+
+  <Accordion icon="circle-exclamation" title="Grid Not Loading">
+    **Solutions:**
+    1. Check your internet connection
+    2. Refresh the page
+    3. Clear browser cache
+    4. Check browser console for errors
+  </Accordion>
+</AccordionGroup>
+
+## What's Next?
+
+<CardGroup cols={2}>
+  <Card
+    title="User Guide"
+    icon="book"
+    href="/guides/overview"
+  >
+    Learn advanced strategies and features
+  </Card>
+  <Card
+    title="Economics Guide"
+    icon="chart-line"
+    href="/guides/economics"
+  >
+    Understand the pricing and profit system
+  </Card>
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/introduction"
+  >
+    Build on top of x402's Pixel War
+  </Card>
+  <Card
+    title="Wallet Setup"
+    icon="wallet"
+    href="/wallet-setup"
+  >
+    Detailed wallet configuration guide
+  </Card>
+</CardGroup>
+
+## Need Help?
+
+<Card
+  title="Join Our Community"
+  icon="discord"
+  href="https://discord.gg/your-discord"
+>
+  Get help from other players and the team
+</Card>
+
+---
+
+<Check>
+  **Ready to play?** Head to [x402-pixel-war.vercel.app](https://x402-pixel-war.vercel.app) and start your conquest!
+</Check>

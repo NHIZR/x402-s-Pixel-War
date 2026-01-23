@@ -1,0 +1,234 @@
+---
+title: Welcome to x402's Pixel War
+description: 'A multiplayer pixel conquest game on Solana blockchain with dynamic pricing and real-time synchronization'
+---
+
+<img
+  className="block dark:hidden"
+  src="/images/hero-light.png"
+  alt="Hero Light"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/hero-dark.png"
+  alt="Hero Dark"
+/>
+
+## What is x402's Pixel War?
+
+x402's Pixel War is an innovative **blockchain-based pixel conquest game** where players compete to own pixels on a 50×30 grid. Each conquest increases the pixel's price by 20%, creating a dynamic economic system.
+
+<CardGroup cols={2}>
+  <Card
+    title="Play Now"
+    icon="gamepad"
+    href="https://x402-pixel-war.vercel.app"
+  >
+    Start conquering pixels and earning profits
+  </Card>
+  <Card
+    title="Quick Start"
+    icon="rocket"
+    href="/quickstart"
+  >
+    Get set up in under 5 minutes
+  </Card>
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/introduction"
+  >
+    Explore all RPC functions and endpoints
+  </Card>
+  <Card
+    title="Architecture"
+    icon="sitemap"
+    href="/development/architecture"
+  >
+    Deep dive into the system design
+  </Card>
+</CardGroup>
+
+## Key Features
+
+<AccordionGroup>
+  <Accordion icon="grid-2" title="50×30 Pixel Grid">
+    1,500 conquerable pixels on a shared canvas. Each pixel is a unique asset with its own price history and ownership.
+  </Accordion>
+
+  <Accordion icon="chart-line" title="Dynamic Pricing">
+    Price increases by 20% with each conquest. Early conquests cost only 0.01 USDC, creating opportunities for profit.
+  </Accordion>
+
+  <Accordion icon="bolt" title="Real-time Sync">
+    Powered by Supabase Realtime, see all conquests instantly (<500ms latency). Compete with players globally in real-time.
+  </Accordion>
+
+  <Accordion icon="layer-group" title="Batch Operations">
+    Conquer multiple pixels at once with intelligent skipping of owned pixels. Create pixel art efficiently.
+  </Accordion>
+
+  <Accordion icon="palette" title="Free Recoloring">
+    Change colors of your owned pixels for free. Express creativity without additional cost.
+  </Accordion>
+</AccordionGroup>
+
+## Game Mechanics
+
+### How It Works
+
+1. **Connect Wallet**: Use Phantom, Solflare, or Torus wallet
+2. **Select Pixels**: Click or drag to select pixels (hold Shift for multi-select)
+3. **Pay & Conquer**: Pay the current price in USDC to claim ownership
+4. **Earn Profits**: When someone conquers your pixel, you receive 110% back
+
+### Economic Model
+
+<CodeGroup>
+```javascript Price Calculation
+// Price increases by 20% (×1.2) per conquest
+currentPrice = basePrice × (1.2 ** conquestCount);
+
+// Example: After 10 conquests
+// 0.01 → 0.012 → 0.0144 → ... → 0.062 USDC
+```
+
+```javascript Profit Distribution
+// When Alice's pixel (1.0 USDC) is conquered by Bob:
+const payment = 1.0;  // Bob pays
+const aliceReceives = payment × 1.1;  // 1.1 USDC (110%)
+const platformFee = payment × 0.1;     // 0.1 USDC (10% tax)
+const newPrice = payment × 1.2;        // 1.2 USDC (new price)
+
+// Alice's profit: 0.1 USDC (10% ROI)
+```
+</CodeGroup>
+
+## Tech Stack
+
+<CardGroup cols={3}>
+  <Card title="Next.js 15" icon="react">
+    React 19, App Router, TypeScript
+  </Card>
+  <Card title="Supabase" icon="database">
+    PostgreSQL + Realtime sync
+  </Card>
+  <Card title="Solana" icon="link">
+    Blockchain + x402 payment
+  </Card>
+  <Card title="Tailwind CSS" icon="paintbrush">
+    Modern styling framework
+  </Card>
+  <Card title="shadcn/ui" icon="palette">
+    Beautiful UI components
+  </Card>
+  <Card title="Zustand" icon="store">
+    Lightweight state management
+  </Card>
+</CardGroup>
+
+## Quick Stats
+
+<Info>
+  **Live Stats**: Check out real-time statistics on the [demo site](https://x402-pixel-war.vercel.app)
+</Info>
+
+| Metric | Value |
+|--------|-------|
+| **Grid Size** | 50×30 (1,500 pixels) |
+| **Initial Price** | 0.01 USDC per pixel |
+| **Price Increase** | 20% per conquest |
+| **Profit on Resale** | 10% guaranteed |
+| **Platform Fee** | 10% war tax |
+| **Sync Latency** | <500ms globally |
+
+## Development Timeline
+
+<Steps>
+  <Step title="Day 1 - Core Features">
+    Mock payment system, single & batch conquest, database RPC functions, performance optimization
+  </Step>
+  <Step title="Day 2 - Testing & Bug Fixes">
+    End-to-end testing, batch conquest optimization (40% → 100% success rate), UI/UX refinements
+  </Step>
+  <Step title="Day 3 - Documentation (Today)">
+    Complete API docs, user guide, deployment guide, architecture documentation, Mintlify integration
+  </Step>
+  <Step title="Day 4 - Features & Polish">
+    User stats dashboard, leaderboard, transaction history, UI enhancements
+  </Step>
+  <Step title="Day 5 - Deployment & Demo">
+    Production deployment, demo preparation, final testing, presentation materials
+  </Step>
+</Steps>
+
+## What's Next?
+
+<CardGroup cols={2}>
+  <Card
+    title="Quick Start Guide"
+    icon="book-open"
+    href="/quickstart"
+  >
+    Set up your wallet and start playing in 5 minutes
+  </Card>
+  <Card
+    title="User Guide"
+    icon="user"
+    href="/guides/overview"
+  >
+    Learn strategies and advanced features
+  </Card>
+  <Card
+    title="API Documentation"
+    icon="code"
+    href="/api-reference/introduction"
+  >
+    Integrate with our RPC functions
+  </Card>
+  <Card
+    title="Deploy Your Own"
+    icon="rocket"
+    href="/development/deployment"
+  >
+    Fork and deploy your own instance
+  </Card>
+</CardGroup>
+
+<Note>
+  This project is built for the hackathon with **Claude Code** assistance, achieving 3-4x development acceleration.
+</Note>
+
+## Community & Support
+
+<CardGroup cols={3}>
+  <Card
+    title="GitHub"
+    icon="github"
+    href="https://github.com/yourusername/x402-pixel-war"
+  >
+    View source code and contribute
+  </Card>
+  <Card
+    title="Discord"
+    icon="discord"
+    href="https://discord.gg/your-discord"
+  >
+    Join our community chat
+  </Card>
+  <Card
+    title="Twitter"
+    icon="twitter"
+    href="https://twitter.com/x402PixelWar"
+  >
+    Follow for updates
+  </Card>
+</CardGroup>
+
+---
+
+<Warning>
+  **Demo Notice**: Currently using mock payment system for demonstration. Real x402/USDC integration coming soon.
+</Warning>
+
+Ready to start? Check out the [Quick Start Guide](/quickstart) →
