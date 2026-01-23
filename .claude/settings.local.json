@@ -17,7 +17,8 @@
       "Bash(supabase db --help:*)",
       "Bash(lsof:*)",
       "Bash(xargs kill:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(node -e:*)"
     ]
   }
 }

@@ -29,10 +29,6 @@
     {
       "name": "API Reference",
       "url": "api-reference"
-    },
-    {
-      "name": "Guides",
-      "url": "guides"
     }
   ],
   "anchors": [
@@ -57,51 +53,13 @@
       "group": "Getting Started",
       "pages": [
         "introduction",
-        "quickstart",
-        "wallet-setup"
-      ]
-    },
-    {
-      "group": "User Guide",
-      "pages": [
-        "guides/overview",
-        "guides/basic-operations",
-        "guides/advanced-features",
-        "guides/economics",
-        "guides/strategies"
+        "quickstart"
       ]
     },
     {
       "group": "API Reference",
       "pages": [
-        "api-reference/introduction",
-        "api-reference/authentication"
-      ]
-    },
-    {
-      "group": "Pixel Conquest",
-      "pages": [
-        "api-reference/conquer-pixel",
-        "api-reference/conquer-batch",
-        "api-reference/recolor-pixel",
-        "api-reference/recolor-batch"
-      ]
-    },
-    {
-      "group": "Data Queries",
-      "pages": [
-        "api-reference/get-grid",
-        "api-reference/get-wallet-pixels",
-        "api-reference/get-user-stats"
-      ]
-    },
-    {
-      "group": "Development",
-      "pages": [
-        "development/architecture",
-        "development/deployment",
-        "development/database-setup",
-        "development/contributing"
+        "api-reference/introduction"
       ]
     }
   ],
