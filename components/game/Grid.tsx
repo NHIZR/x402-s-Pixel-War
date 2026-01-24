@@ -12,6 +12,8 @@ import { BatchConquerModal } from './BatchConquerModal';
 import { UserInfo } from './UserInfo';
 import { LoadingScreen } from '@/components/ui/loading';
 import { Button } from '@/components/ui/button';
+import { FaucetButton } from '@/components/FaucetButton';
+import { WalletConnectionGuide } from '@/components/WalletConnectionGuide';
 import type { Pixel as PixelType } from '@/lib/types/game.types';
 import { PIXEL_FLASH_DURATION, REALTIME_CHANNEL } from '@/lib/constants/game';
 
@@ -273,13 +275,17 @@ export function Grid() {
         </a>
       </div>
 
-      {/* 用户信息 */}
-      <div className="fixed top-4 right-4 z-10">
+      {/* 用户信息和水龙头按钮 */}
+      <div className="fixed top-4 right-4 z-10 flex items-center gap-3">
+        <FaucetButton />
         <UserInfo />
       </div>
 
+      {/* 钱包连接引导（低余额提示） */}
+      <WalletConnectionGuide />
+
       <div className="mb-6 text-center max-w-3xl">
-        <h1 className="text-4xl font-bold mb-3">x402's Pixel War</h1>
+        <h1 className="text-4xl font-bold mb-3">x402&apos;s Pixel War</h1>
         <p className="text-cyber-white/80 mb-2">
           {connected ? (
             <>
