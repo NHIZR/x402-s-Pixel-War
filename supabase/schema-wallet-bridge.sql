@@ -13,7 +13,7 @@ CREATE OR REPLACE FUNCTION conquer_pixel_wallet(
   p_pixel_y INTEGER,
   p_wallet_address VARCHAR(100),
   p_new_color VARCHAR(7),
-  p_tx_hash VARCHAR(100) -- Mock payment transaction hash
+  p_tx_hash TEXT -- Solana transaction hash (signature)
 )
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -47,7 +47,7 @@ BEGIN
   -- Calculate new price (20% increase)
   v_new_price := v_price * 1.20;
 
-  -- Update pixel ownership
+  -- Update pixel ownership with transaction tracking
   UPDATE pixels
   SET
     wallet_owner = p_wallet_address,
@@ -55,21 +55,42 @@ BEGIN
     current_price = v_new_price,
     conquest_count = conquest_count + 1,
     last_conquered_at = NOW(),
+    last_tx_hash = p_tx_hash,
+    last_tx_timestamp = NOW(),
+    tx_count = COALESCE(tx_count, 0) + 1,
     updated_at = NOW()
   WHERE x = p_pixel_x AND y = p_pixel_y;
 
-  -- Note: For MVP, we're skipping transaction history recording
-  -- This can be added later when integrating real payment system
+  -- Insert transaction record into history table
+  INSERT INTO pixel_transactions (
+    pixel_x,
+    pixel_y,
+    tx_hash,
+    from_wallet,
+    to_wallet,
+    usdc_amount,
+    tx_timestamp
+  ) VALUES (
+    p_pixel_x,
+    p_pixel_y,
+    p_tx_hash,
+    v_previous_owner,
+    p_wallet_address,
+    v_price,
+    NOW()
+  );
 
   -- Return success with details
   RETURN jsonb_build_object(
     'success', true,
+    'txHash', p_tx_hash,
     'pixel', jsonb_build_object(
       'x', p_pixel_x,
       'y', p_pixel_y,
       'color', p_new_color,
       'newPrice', v_new_price,
-      'walletOwner', p_wallet_address
+      'walletOwner', p_wallet_address,
+      'lastTxHash', p_tx_hash
     ),
     'transaction', jsonb_build_object(
       'pricePaid', v_price,
@@ -85,7 +106,7 @@ $$;
 CREATE OR REPLACE FUNCTION conquer_pixels_batch(
   p_pixels JSONB, -- Array of {x, y, color}
   p_wallet_address VARCHAR(100),
-  p_tx_hash VARCHAR(100)
+  p_tx_hash TEXT -- Solana transaction hash (base)
 )
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -98,17 +119,21 @@ DECLARE
   v_error_count INTEGER := 0;
   v_total_paid DECIMAL(20, 8) := 0;
   v_pixel_result JSONB;
+  v_pixel_tx_hash TEXT;
 BEGIN
   -- Process each pixel
   FOR v_pixel_item IN SELECT * FROM jsonb_array_elements(p_pixels)
   LOOP
-    -- Conquer individual pixel
+    -- Create unique tx_hash for each pixel by appending coordinates
+    v_pixel_tx_hash := p_tx_hash || '_' || (v_pixel_item->>'x') || '_' || (v_pixel_item->>'y');
+
+    -- Conquer individual pixel with unique tx_hash
     v_pixel_result := conquer_pixel_wallet(
       (v_pixel_item->>'x')::INTEGER,
       (v_pixel_item->>'y')::INTEGER,
       p_wallet_address,
       v_pixel_item->>'color',
-      p_tx_hash
+      v_pixel_tx_hash
     );
 
     -- Accumulate results
@@ -208,7 +233,7 @@ CREATE POLICY "Wallet users can update pixels via RPC"
 -- Note: In production, you'd want more restrictive policies
 -- For hackathon MVP, allowing updates via RPC functions is sufficient
 
-COMMENT ON FUNCTION conquer_pixel_wallet IS 'Conquer a pixel using Solana wallet address (no Supabase Auth required)';
-COMMENT ON FUNCTION conquer_pixels_batch IS 'Batch conquer multiple pixels in a single transaction';
+COMMENT ON FUNCTION conquer_pixel_wallet IS 'Conquer a pixel using Solana wallet address (no Supabase Auth required). Records Solana transaction hash and stores in pixel_transactions table.';
+COMMENT ON FUNCTION conquer_pixels_batch IS 'Batch conquer multiple pixels in a single transaction. Each pixel gets a unique tx_hash by appending coordinates to base hash.';
 COMMENT ON FUNCTION get_grid_state_wallet IS 'Get grid state with wallet owner information';
 COMMENT ON FUNCTION get_wallet_pixels IS 'Get all pixels owned by a specific wallet address';
