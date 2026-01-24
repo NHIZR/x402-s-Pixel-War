@@ -34,9 +34,9 @@ export function formatPrice(price: number): string {
   }
 }
 
-// 格式化余额显示（带 x402 单位）
+// 格式化余额显示（带 USDC 单位）
 export function formatBalance(balance: number): string {
-  return `${formatPrice(balance)} x402`;
+  return `${formatPrice(balance)} USDC`;
 }
 
 // 计算经过 N 次占领后的价格

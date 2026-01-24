@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json(
     {
-      faucet: 'x402 Test USDC Faucet',
+      faucet: 'Test USDC Faucet (powered by x402)',
       amount: 100,
       rateLimit: '1 request per 24 hours',
       network: 'Solana Testnet',

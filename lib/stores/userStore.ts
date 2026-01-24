@@ -4,7 +4,7 @@ import { create } from 'zustand';
 interface UserStore {
   // 状态
   walletAddress: string | null;
-  balance: number; // x402 余额 (USDC)
+  balance: number; // USDC 余额 (通过 x402 协议支付)
   isLoading: boolean;
 
   // 操作方法

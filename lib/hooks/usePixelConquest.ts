@@ -53,7 +53,7 @@ export function usePixelConquest() {
 
         if (errorMsg.includes('Insufficient balance')) {
           toast.error('余额不足', {
-            description: `需要 ${data.required?.toFixed(4)} x402，当前余额 ${data.available?.toFixed(4)} x402`,
+            description: `需要 ${data.required?.toFixed(4)} USDC，当前余额 ${data.available?.toFixed(4)} USDC`,
           });
         } else if (errorMsg.includes('already own')) {
           toast.warning('你已经拥有这个像素了');
@@ -68,7 +68,7 @@ export function usePixelConquest() {
 
       // 成功！
       toast.success('占领成功！🎉', {
-        description: `花费 ${data.transaction.pricePaid.toFixed(4)} x402，像素现在是你的了！`,
+        description: `花费 ${data.transaction.pricePaid.toFixed(4)} USDC，像素现在是你的了！`,
       });
 
       return data;
