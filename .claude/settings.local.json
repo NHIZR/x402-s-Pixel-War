@@ -20,7 +20,19 @@
       "Bash(curl:*)",
       "Bash(node -e:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(solana --version:*)",
+      "Bash(spl-token:*)",
+      "Bash(cargo install:*)",
+      "Bash(brew search:*)",
+      "Bash(sh -s -- -y)",
+      "Bash(source \"$HOME/.cargo/env\")",
+      "Bash(export PATH=\"$HOME/.cargo/bin:$PATH\")",
+      "Bash(./scripts/create-token.sh:*)",
+      "Bash(solana airdrop:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx tsc:*)",
+      "Bash(tee:*)"
     ]
   }
 }
