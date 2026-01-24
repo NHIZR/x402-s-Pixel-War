@@ -1,14 +1,18 @@
-# Testnet 设置指南
+# Solana 测试网络设置指南
 
-完整的 Solana Testnet 代币创建和配置指南，适用于 x402's Pixel War 项目。
+完整的 Solana 测试网络代币创建和配置指南，适用于 x402's Pixel War 项目。
+
+> **推荐**: 使用 Devnet (更稳定) 而不是 Testnet
 
 ---
 
 ## 目录
 
 - [概述](#概述)
+- [Devnet vs Testnet](#devnet-vs-testnet)
 - [前置要求](#前置要求)
-- [第一部分：创建 Testnet 代币](#第一部分创建-testnet-代币)
+- [快速开始 (Devnet - 推荐)](#快速开始-devnet---推荐)
+- [第一部分：创建测试代币](#第一部分创建测试代币)
 - [第二部分：配置环境变量](#第二部分配置环境变量)
 - [第三部分：部署和测试](#第三部分部署和测试)
 - [故障排除](#故障排除)
@@ -18,14 +22,26 @@
 
 ## 概述
 
-本指南将帮助您在 Solana Testnet 上创建自定义 USDC 测试代币，并配置游戏使用这些代币进行支付。
+本指南将帮助您在 Solana 测试网络上创建自定义 USDC 测试代币，并配置游戏使用这些代币进行支付。
 
-### 为什么使用 Testnet？
+### 为什么使用测试网络？
 
-- **真实区块链体验**: 所有交易都在真实的 Solana 区块链上（Testnet）
+- **真实区块链体验**: 所有交易都在真实的 Solana 区块链上
 - **零成本**: 使用免费的测试代币，无需真实资金
 - **可验证**: 可以在 Solana Explorer 上查看所有交易
 - **安全演示**: 适合演示、开发和学习，不会有资金损失风险
+
+### Devnet vs Testnet
+
+| 特性 | Devnet | Testnet |
+|------|--------|---------|
+| **稳定性** | ⭐⭐⭐⭐⭐ 更稳定 | ⭐⭐⭐ 偶尔不稳定 |
+| **水龙头** | ✅ 网页水龙头可靠 | ⚠️ 经常限流 |
+| **RPC 性能** | ✅ 响应快 | ⚠️ 经常超时 |
+| **使用场景** | 开发和测试 | 接近主网的测试 |
+| **推荐度** | ✅ 推荐用于本项目 | ⚠️ 备选方案 |
+
+**结论**: 本项目推荐使用 Devnet。
 
 ### x402 vs USDC
 
@@ -37,6 +53,51 @@
 | **USDC** | 支付代币 | 实际用于支付的稳定币（本项目中是测试代币） |
 
 **类比**: x402 就像 HTTP 协议，USDC 就像网页内容。
+
+---
+
+## 快速开始 (Devnet - 推荐)
+
+如果您想快速开始并避免网络问题，请按照以下步骤使用 Devnet:
+
+### 1. 切换到 Devnet
+
+```bash
+cd "/Users/lobesterk/Library/Mobile Documents/com~apple~CloudDocs/x402's Pixel War"
+solana config set --url devnet
+solana config set --keypair wallets/treasury-wallet.json
+```
+
+### 2. 获取 SOL
+
+由于 CLI 水龙头有限流，请使用网页水龙头:
+
+1. 钱包地址: `H7yThEThcDYFe7BGx9iHuXs4WMAWB3yux4DL9wGFqqbn`
+2. 访问以下任一水龙头获取 1-2 SOL:
+   - https://faucet.quicknode.com/solana/devnet
+   - https://solfaucet.com/ (选择 Devnet)
+
+### 3. 运行自动化脚本
+
+```bash
+./scripts/create-devnet-token.sh
+```
+
+这个脚本会自动:
+- ✅ 创建 SPL Token (6 decimals)
+- ✅ 创建 token accounts
+- ✅ 铸造 1,000,000 tokens
+- ✅ 创建 faucet 钱包
+- ✅ 转移 500,000 tokens 到 faucet
+- ✅ 输出环境变量配置
+
+### 4. 配置 .env.local
+
+将脚本输出的环境变量复制到 `.env.local` 文件。
+
+### 5. 完成！
+
+运行 `npm run dev` 即可开始测试。
 
 ---
 

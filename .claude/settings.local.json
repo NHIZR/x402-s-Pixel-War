@@ -32,7 +32,9 @@
       "Bash(solana airdrop:*)",
       "Bash(npm run build:*)",
       "Bash(npx tsc:*)",
-      "Bash(tee:*)"
+      "Bash(tee:*)",
+      "Bash(solana config set:*)",
+      "Bash(~/.cargo/bin/spl-token:*)"
     ]
   }
 }

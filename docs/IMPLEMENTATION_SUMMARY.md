@@ -179,33 +179,54 @@
 
 ## ⏳ 待完成的任务 (2/10)
 
-### Task 1: 创建 Testnet 钱包和代币 ⏳
-**状态**: 等待 Solana Testnet 恢复
+### Task 1: 创建 Devnet 钱包和代币 ⏳
+**状态**: 已切换到 Devnet，等待手动获取 SOL
 
 **已准备**:
 - ✅ Solana CLI 已安装 (v1.18.20)
 - ✅ SPL Token CLI 已安装 (v5.5.0)
-- ✅ 创建脚本已就绪 (`scripts/create-token.sh`)
-- ✅ 钱包已创建（但未获得 SOL）
+- ✅ 已切换到 Devnet (更稳定)
+- ✅ 钱包文件已创建
 
 **已创建的钱包**:
-- Treasury: `2vDEmCqqtr4NHEFu4VwndNLbP6X7MyiN2Qdb6QGvyUkU`
-- Faucet: `3Q92nm8SJsPDPYuKDxpqD5kQjUH2xZ7Xwyp45difmUe8`
+- Treasury: `H7yThEThcDYFe7BGx9iHuXs4WMAWB3yux4DL9wGFqqbn`
+  - 文件: `wallets/treasury-wallet.json`
+  - 当前余额: 0 SOL (Devnet)
 
-**阻塞原因**: Solana Testnet 水龙头限流，无法空投 SOL
+**阻塞原因**: Devnet CLI 水龙头也有限流，无法通过命令行空投 SOL
 
-**解决方案**:
-1. 使用网页水龙头手动获取 SOL：
-   - https://faucet.quicknode.com/solana/testnet
-   - https://faucet.solana.com/
-   - https://solfaucet.com/
+**解决方案** (推荐使用网页水龙头):
+1. 使用以下任一网页水龙头为 Treasury 钱包充值 1-2 SOL:
+   - QuickNode Devnet Faucet: https://faucet.quicknode.com/solana/devnet
+   - Sol Faucet (Devnet): https://solfaucet.com/ (选择 Devnet)
+   - 钱包地址: `H7yThEThcDYFe7BGx9iHuXs4WMAWB3yux4DL9wGFqqbn`
 
-2. 获取 SOL 后运行：
+2. 获取 SOL 后，创建 SPL Token:
    ```bash
-   ./scripts/create-token.sh
+   cd "/Users/lobesterk/Library/Mobile Documents/com~apple~CloudDocs/x402's Pixel War"
+   ~/.cargo/bin/spl-token create-token --decimals 6
    ```
 
-3. 将输出的环境变量添加到 `.env.local`
+3. 记录输出的 Token Mint Address，然后创建 Token Account 并铸造代币:
+   ```bash
+   # 假设 Token Address 是 <MINT_ADDRESS>
+   ~/.cargo/bin/spl-token create-account <MINT_ADDRESS>
+   ~/.cargo/bin/spl-token mint <MINT_ADDRESS> 1000000
+   ```
+
+4. 创建 Faucet 钱包:
+   ```bash
+   solana-keygen new --outfile wallets/faucet-wallet.json --no-bip39-passphrase
+   ```
+
+5. 将输出的环境变量添加到 `.env.local`:
+   ```bash
+   NEXT_PUBLIC_SOLANA_NETWORK=devnet
+   NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
+   NEXT_PUBLIC_USDC_MINT_ADDRESS=<your_mint_address>
+   NEXT_PUBLIC_GAME_TREASURY_WALLET=H7yThEThcDYFe7BGx9iHuXs4WMAWB3yux4DL9wGFqqbn
+   FAUCET_WALLET_PRIVATE_KEY=<faucet_wallet_base58_private_key>
+   ```
 
 ---
 
