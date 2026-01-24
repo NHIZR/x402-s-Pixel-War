@@ -8,6 +8,7 @@
 
 - [概览](#概览)
 - [前置要求](#前置要求)
+- [Testnet 代币设置](#testnet-代币设置)
 - [Supabase 配置](#supabase-配置)
 - [Vercel 部署](#vercel-部署)
 - [环境变量配置](#环境变量配置)
@@ -27,10 +28,10 @@ x402's Pixel War 使用以下技术栈部署：
 |------|------|------|
 | **前端** | Vercel | Next.js 应用托管 |
 | **数据库** | Supabase | PostgreSQL + Realtime |
-| **区块链** | Solana | Devnet/Mainnet |
-| **支付** | x402 (Mock) | USDC 支付协议 |
+| **区块链** | Solana Testnet | 测试网络（推荐演示） |
+| **支付** | x402 + 自定义 USDC | 真实链上交易（测试代币） |
 
-**部署时间**: 约 15-30 分钟
+**部署时间**: 约 30-45 分钟（包含代币创建）
 
 ---
 
@@ -54,6 +55,76 @@ git --version
 
 # Vercel CLI (可选)
 npm install -g vercel
+
+# Solana CLI（必需，用于创建代币）
+solana --version  # v1.18.0+
+spl-token --version
+```
+
+---
+
+## Testnet 代币设置
+
+在部署应用之前，您需要创建自定义 USDC 测试代币。这是一次性操作。
+
+### 快速开始
+
+```bash
+# 1. 配置 Solana CLI 到 Testnet
+solana config set --url https://api.testnet.solana.com
+
+# 2. 获取测试 SOL（用于 gas 费用）
+solana airdrop 2
+
+# 3. 运行代币创建脚本
+cd scripts
+./create-token.sh
+```
+
+脚本会自动：
+- 创建 Treasury 和 Faucet 钱包
+- 创建自定义 USDC 代币
+- 铸造初始代币供应（1,000,000 USDC）
+- 输出所有需要的环境变量值
+
+### 手动步骤（可选）
+
+如果您想手动创建代币，请参考 [Testnet 设置指南](TESTNET_SETUP.md)，其中包含详细的步骤说明：
+
+1. 创建 Treasury 和 Faucet 钱包
+2. 创建 SPL Token
+3. 铸造初始供应
+4. 配置元数据
+
+### 重要输出
+
+脚本完成后，会显示以下信息（保存这些值）：
+
+```
+Token Mint Address: ABC123xyz...
+Faucet Wallet Address: DEF456abc...
+Treasury Wallet Address: GHI789def...
+Faucet Token Account: JKL012ghi...
+
+钱包文件位置:
+- wallets/treasury-keypair.json
+- wallets/faucet-keypair.json
+```
+
+**安全提示**:
+- 不要将钱包文件提交到 Git
+- 在 Vercel 上使用环境变量存储钱包内容（base64 编码）
+- Testnet 钱包仅用于测试，不要在 Mainnet 上使用
+
+### 验证代币创建
+
+```bash
+# 检查 Faucet 余额
+spl-token balance <TOKEN_MINT_ADDRESS> --owner wallets/faucet-keypair.json
+# 应该显示: 1000000
+
+# 在 Solana Explorer 查看
+# https://explorer.solana.com/address/<TOKEN_MINT_ADDRESS>?cluster=testnet
 ```
 
 ---
@@ -222,32 +293,54 @@ NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-#### 2. Solana 配置
+#### 2. Solana Testnet 配置（推荐）
 
-**开发/演示环境（使用 Devnet）**:
+**使用自定义 USDC 代币的 Testnet 配置**:
+
 ```bash
-NEXT_PUBLIC_SOLANA_NETWORK=devnet
-NEXT_PUBLIC_SOLANA_RPC_HOST=https://api.devnet.solana.com
+# Solana 网络配置
+NEXT_PUBLIC_SOLANA_NETWORK=testnet
+NEXT_PUBLIC_SOLANA_RPC_URL=https://api.testnet.solana.com
+
+# 代币配置（从 create-token.sh 输出获取）
+NEXT_PUBLIC_USDC_MINT_ADDRESS=your_token_mint_address
+NEXT_PUBLIC_FAUCET_WALLET=your_faucet_public_key
+
+# 服务端钱包配置（使用 base64 编码的钱包内容）
+TREASURY_WALLET_BASE64=base64_encoded_treasury_keypair
+FAUCET_WALLET_BASE64=base64_encoded_faucet_keypair
 ```
 
-**生产环境（使用 Mainnet）**:
+**如何获取 base64 编码的钱包**:
+
+```bash
+# macOS/Linux
+cat wallets/treasury-keypair.json | base64
+cat wallets/faucet-keypair.json | base64
+
+# 将输出的 base64 字符串复制到 Vercel 环境变量
+```
+
+**或者使用文件路径（仅适用于有文件系统访问的环境）**:
+
+```bash
+TREASURY_WALLET_PATH=/var/task/wallets/treasury-keypair.json
+FAUCET_WALLET_PATH=/var/task/wallets/faucet-keypair.json
+```
+
+#### 3. Mainnet 配置（生产环境，需要真实资金）
+
+**⚠️ 警告**: Mainnet 使用真实的 SOL 和 USDC，确保充分测试。
+
 ```bash
 NEXT_PUBLIC_SOLANA_NETWORK=mainnet-beta
-NEXT_PUBLIC_SOLANA_RPC_HOST=https://api.mainnet-beta.solana.com
+NEXT_PUBLIC_SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
 
-# 或使用付费 RPC（推荐生产环境）
-# NEXT_PUBLIC_SOLANA_RPC_HOST=https://solana-mainnet.g.alchemy.com/v2/YOUR_API_KEY
-```
+# 使用官方 USDC 代币
+NEXT_PUBLIC_USDC_MINT_ADDRESS=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
 
-#### 3. x402 配置（可选）
-
-```bash
-# Mock 模式（演示用）
-NEXT_PUBLIC_X402_MODE=mock
-
-# 真实支付模式（需要 PayAI 集成）
-# NEXT_PUBLIC_X402_MODE=production
-# NEXT_PUBLIC_X402_API_KEY=your_payai_api_key
+# 推荐使用付费 RPC 以提高性能
+# NEXT_PUBLIC_SOLANA_RPC_URL=https://solana-mainnet.g.alchemy.com/v2/YOUR_API_KEY
 ```
 
 ### 环境变量模板
@@ -259,12 +352,15 @@ NEXT_PUBLIC_X402_MODE=mock
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...
 
-# Solana
-NEXT_PUBLIC_SOLANA_NETWORK=devnet
-NEXT_PUBLIC_SOLANA_RPC_HOST=https://api.devnet.solana.com
+# Solana Testnet
+NEXT_PUBLIC_SOLANA_NETWORK=testnet
+NEXT_PUBLIC_SOLANA_RPC_URL=https://api.testnet.solana.com
+NEXT_PUBLIC_USDC_MINT_ADDRESS=your_token_mint_address
+NEXT_PUBLIC_FAUCET_WALLET=your_faucet_public_key
 
-# x402
-NEXT_PUBLIC_X402_MODE=mock
+# Server-side wallets (base64 encoded)
+TREASURY_WALLET_BASE64=base64_encoded_treasury_keypair
+FAUCET_WALLET_BASE64=base64_encoded_faucet_keypair
 ```
 
 ### 环境变量作用域
@@ -275,44 +371,90 @@ NEXT_PUBLIC_X402_MODE=mock
 
 建议为所有环境（Development, Preview, Production）添加相同的变量。
 
+### 环境变量安全清单
+
+在配置 Vercel 环境变量时，请确保：
+
+- ✅ **NEXT_PUBLIC_*** 变量是公开的（客户端可见），不要包含敏感信息
+- ✅ **TREASURY_WALLET_*** 和 **FAUCET_WALLET_*** 仅在服务端使用
+- ✅ 使用 base64 编码存储钱包密钥，而不是文件路径
+- ✅ 不要将钱包文件提交到 Git 仓库
+- ✅ 定期检查 Vercel 日志，确保没有泄露私钥
+- ✅ 为不同环境（Dev/Preview/Prod）使用相同的 Testnet 配置
+
 ---
 
 ## Solana 网络配置
 
-### Devnet（推荐用于演示）
+### Testnet（强烈推荐用于演示和开发）
 
 **优点**:
-- 免费测试代币
-- 无需真实资金
-- 快速迭代测试
+- 真实的区块链交易体验
+- 免费测试代币，无需真实资金
+- 稳定性高于 Devnet
+- 适合公开演示和 Hackathon
+- 交易可在 Solana Explorer 上验证
+
+**配置**:
+```bash
+NEXT_PUBLIC_SOLANA_NETWORK=testnet
+NEXT_PUBLIC_SOLANA_RPC_URL=https://api.testnet.solana.com
+NEXT_PUBLIC_USDC_MINT_ADDRESS=<your_custom_token_address>
+NEXT_PUBLIC_FAUCET_WALLET=<your_faucet_wallet_address>
+```
+
+**获取测试代币**:
+1. 用户通过应用内水龙头获取测试 USDC（每 24 小时 100 个）
+2. SOL 水龙头: https://faucet.solana.com/ （用于 gas 费）
+
+**设置步骤**:
+详细步骤请查看 [Testnet 设置指南](TESTNET_SETUP.md)
+
+### Devnet（快速开发）
+
+**优点**:
+- 最快的网络
+- 频繁重置，适合实验
+
+**缺点**:
+- 不稳定，可能频繁重置
+- 不适合长期演示
 
 **配置**:
 ```bash
 NEXT_PUBLIC_SOLANA_NETWORK=devnet
-NEXT_PUBLIC_SOLANA_RPC_HOST=https://api.devnet.solana.com
+NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
 ```
-
-**获取测试代币**:
-- SOL 水龙头: https://faucet.solana.com/
-- 测试 USDC: 参考 [钱包设置指南](WALLET_SETUP.md)
 
 ### Mainnet（生产环境）
 
-**注意事项**:
-- ⚠️ 需要真实 SOL 和 USDC
-- ⚠️ 真实资金有风险
-- ⚠️ 建议使用付费 RPC 提高性能
+**⚠️ 重要警告**:
+- 需要真实 SOL 和 USDC
+- 涉及真实资金，有损失风险
+- 确保充分测试后再部署
+- 强烈建议使用付费 RPC 提高性能和可靠性
 
 **配置**:
 ```bash
 NEXT_PUBLIC_SOLANA_NETWORK=mainnet-beta
-NEXT_PUBLIC_SOLANA_RPC_HOST=https://api.mainnet-beta.solana.com
+NEXT_PUBLIC_SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+
+# 使用官方 USDC 代币
+NEXT_PUBLIC_USDC_MINT_ADDRESS=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
 ```
 
 **推荐的 RPC 服务商**:
 1. **Alchemy**: https://www.alchemy.com/solana
 2. **Helius**: https://www.helius.dev/
 3. **QuickNode**: https://www.quicknode.com/chains/sol
+
+**Mainnet 部署前清单**:
+- [ ] 在 Testnet 上完成充分测试
+- [ ] 审计智能合约和支付逻辑
+- [ ] 配置速率限制和安全措施
+- [ ] 准备充足的 SOL 和 USDC
+- [ ] 设置监控和告警系统
+- [ ] 准备应急响应计划
 
 ---
 
@@ -330,13 +472,17 @@ https://your-project.vercel.app
 - [ ] 页面正常加载
 - [ ] 像素网格显示正确（50×30 = 1,500 个像素）
 - [ ] 钱包连接按钮可见
-- [ ] 连接 Phantom/Solflare 钱包
-- [ ] 显示钱包地址和余额
+- [ ] 连接 Phantom/Solflare 钱包（确保切换到 Testnet）
+- [ ] 显示钱包地址和 USDC 余额
+- [ ] 测试水龙头功能（获取 100 测试 USDC）
+- [ ] 验证水龙头交易在 Solana Explorer 上可见
 - [ ] 点击像素弹出详情弹窗
-- [ ] 单个像素占领功能
-- [ ] 批量像素选择（Shift + 点击/拖动）
-- [ ] 批量占领功能
-- [ ] 实时同步（多个浏览器窗口测试）
+- [ ] 测试单个像素占领功能
+- [ ] 验证像素占领交易成功并在区块链上确认
+- [ ] 测试批量像素选择（Shift + 点击/拖动）
+- [ ] 测试批量占领功能
+- [ ] 验证实时同步（多个浏览器窗口测试）
+- [ ] 检查 Treasury 钱包收到平台费用
 
 ### 3. 数据库验证
 
@@ -653,14 +799,35 @@ vercel promote DEPLOYMENT_URL
 
 ## 安全检查清单
 
+### 环境变量和密钥安全
 - [ ] 环境变量已正确配置
-- [ ] Supabase RLS 策略已启用
-- [ ] 不要在客户端暴露私钥
+- [ ] 钱包私钥仅在服务端使用（TREASURY_WALLET_*, FAUCET_WALLET_*）
+- [ ] 不要在客户端暴露私钥或敏感信息
+- [ ] 使用 base64 编码存储钱包密钥
+- [ ] 钱包文件已添加到 .gitignore
+- [ ] Vercel 环境变量使用加密存储
+
+### 区块链和支付安全
+- [ ] Testnet 钱包不在 Mainnet 上使用
+- [ ] 水龙头 API 已实施速率限制（24 小时冷却期）
+- [ ] 所有交易都有金额验证
+- [ ] 交易签名验证已启用
+- [ ] Treasury 钱包有足够的 SOL 用于 gas
+
+### 基础设施安全
 - [ ] 使用 HTTPS（Vercel 自动提供）
+- [ ] Supabase RLS 策略已启用
 - [ ] 启用 Supabase 数据库备份
 - [ ] 配置 CORS（如需要）
 - [ ] 启用速率限制（Vercel Pro）
-- [ ] 定期更新依赖
+- [ ] 定期更新依赖和安全补丁
+
+### 监控和日志
+- [ ] 启用 Vercel Analytics 监控性能
+- [ ] 配置错误追踪（如 Sentry）
+- [ ] 定期检查 Vercel 日志
+- [ ] 监控 Treasury 和 Faucet 钱包余额
+- [ ] 设置余额不足告警
 
 ---
 
@@ -708,12 +875,20 @@ Supabase Pro 计划提供每日自动备份。
 
 ## 相关文档
 
-- [API 文档](API.md)
-- [用户手册](USER_GUIDE.md)
-- [数据库设置](SETUP_DATABASE.md)
-- [架构设计](ARCHITECTURE.md)
+### 设置和配置
+- [Testnet 设置指南](TESTNET_SETUP.md) - 创建测试代币的完整指南
+- [数据库设置](SETUP_DATABASE.md) - Supabase 数据库配置
+- [环境变量参考](.env.local.example) - 所有环境变量说明
+
+### 开发和 API
+- [API 文档](API.md) - API 端点和使用方法
+- [架构设计](ARCHITECTURE.md) - 技术架构和设计决策
+
+### 用户文档
+- [用户手册](USER_GUIDE.md) - 如何使用游戏
+- [README](../README.md) - 项目概述和快速开始
 
 ---
 
-**最后更新**: 2026-01-23
-**版本**: v1.0
+**最后更新**: 2026-01-24
+**版本**: v2.0 (Testnet 支持)

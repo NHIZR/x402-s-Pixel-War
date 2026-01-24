@@ -43,3 +43,11 @@ next-env.d.ts
 # IDE
 .vscode
 .idea
+
+# Solana Wallets (NEVER commit these!)
+wallets/
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!next.json

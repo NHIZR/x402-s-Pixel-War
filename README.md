@@ -1,10 +1,13 @@
 # x402's Pixel War - Solana 像素征服游戏
 
-一个基于 Solana 区块链的多人像素征服游戏，采用 x402 支付协议（USDC）。玩家通过支付 x402 代币来占领像素，价格随征服次数递增 20%。
+一个基于 Solana 区块链的多人像素征服游戏，采用 x402 支付协议和自定义 USDC 测试代币。玩家通过支付 USDC 来占领像素，价格随征服次数递增 20%。
 
-> 🎉 **Day 1 完成！** Mock 支付系统和占领功能已实现。查看 [Day 1 进度报告](docs/DAY1_PROGRESS.md) 了解详情。
+> 💎 **Testnet 支付集成完成！** 真实的区块链交易，使用测试代币。
 >
-> 📋 **下一步**: 执行[数据库迁移](docs/SETUP_DATABASE.md)，然后开始测试占领功能！
+> 🚀 **快速开始**:
+> 1. 查看 [Testnet 设置指南](docs/TESTNET_SETUP.md) 创建代币
+> 2. 执行[数据库迁移](docs/SETUP_DATABASE.md) 初始化数据
+> 3. 启动应用并开始测试！
 
 ![Game Screenshot](docs/screenshots/wallet-connected.png)
 
@@ -18,6 +21,41 @@
   - 平台收取: 10% "战争税"
 - **颜色自定义**: 占领时可以选择任意颜色
 - **批量占领**: 支持一次性占领多个像素
+
+## 💳 支付系统 (Testnet)
+
+本项目使用 **真实的 Solana Testnet 交易** 进行支付，这意味着：
+
+- **真实区块链**: 所有交易都在 Solana Testnet 上链，可以在区块浏览器上验证
+- **x402 协议**: 支付协议标准，用于定义交易规范
+- **USDC 代币**: 使用自定义创建的测试 USDC 代币进行支付（模拟真实 USDC）
+- **测试代币**: 完全免费，通过水龙头获取，无需真实资金
+
+### 关键概念
+
+**x402 vs USDC 的区别**:
+- **x402**: 这是一个**支付协议**，定义了如何进行支付交易的规范
+- **USDC**: 这是实际的**支付代币**（稳定币），在本项目中是自定义创建的测试代币
+
+**工作流程**:
+1. 创建自定义 USDC 测试代币（仅需一次）
+2. 通过水龙头给用户分发测试 USDC（每 24 小时 100 个）
+3. 用户使用测试 USDC 占领像素
+4. 所有交易在 Solana Testnet 上真实执行
+
+### 如何获取测试 USDC
+
+1. **安装 Solana 钱包**: Phantom 或 Solflare
+2. **切换到 Testnet**: 在钱包设置中选择 "Testnet"
+3. **获取测试 SOL**: 访问 https://faucet.solana.com/ (用于支付 gas 费)
+4. **访问游戏的 USDC 水龙头**: 连接钱包后，在游戏界面点击 "获取测试 USDC"
+5. **领取 100 USDC**: 每个钱包每 24 小时可领取一次
+
+### 验证交易
+
+所有交易都可以在 Solana Explorer 上验证：
+- Testnet Explorer: https://explorer.solana.com/?cluster=testnet
+- 粘贴您的钱包地址或交易签名查看详情
 
 ## 🚀 快速开始
 
@@ -39,8 +77,11 @@ cp .env.local.example .env.local
 
 需要配置:
 - **Supabase**: 数据库连接
-- **Solana Network**: devnet (测试网) 或 mainnet-beta (主网)
-- **RPC Endpoint**: (可选) 自定义 RPC 端点
+- **Solana Network**: testnet (推荐) 或 devnet
+- **USDC Token**: 自定义创建的测试 USDC 代币地址
+- **Wallet Paths**: Treasury 和 Faucet 钱包路径（服务端）
+
+详细配置步骤请查看: [Testnet 设置指南](docs/TESTNET_SETUP.md)
 
 ### 3. 初始化数据库
 
@@ -52,17 +93,33 @@ cp .env.local.example .env.local
 SELECT COUNT(*) FROM pixels;  -- 应该返回 1500
 ```
 
-### 4. 连接钱包并获取测试代币
+### 4. 设置 Testnet 代币 (仅首次部署)
 
-详细步骤请查看: [钱包设置指南](docs/WALLET_SETUP.md)
+如果您是项目管理员，需要创建测试 USDC 代币和设置水龙头：
+
+```bash
+# 运行代币创建脚本
+cd scripts
+./create-token.sh
+
+# 按照提示操作，脚本会：
+# 1. 创建 Treasury 和 Faucet 钱包
+# 2. 创建自定义 USDC 代币
+# 3. 铸造初始代币供应
+# 4. 配置代币元数据
+```
+
+详细步骤: [Testnet 设置指南](docs/TESTNET_SETUP.md)
+
+### 5. 连接钱包并获取测试代币 (用户)
 
 快速步骤:
 1. 安装 Phantom 或 Solflare 钱包
-2. 切换到 Devnet (测试网)
+2. 切换到 Testnet (测试网)
 3. 获取测试 SOL: https://faucet.solana.com/
-4. 获取测试 USDC (参考文档)
+4. 在游戏界面点击 "获取测试 USDC" 按钮（每 24 小时 100 个）
 
-### 5. 启动开发服务器
+### 6. 启动开发服务器
 
 ```bash
 npm run dev
@@ -79,9 +136,10 @@ npm run dev
 - **UI 组件**: Lucide React, Sonner (toasts)
 
 ### 区块链
-- **网络**: Solana (Devnet/Mainnet)
+- **网络**: Solana Testnet (推荐用于演示和测试)
 - **钱包**: @solana/wallet-adapter-react
-- **支付协议**: x402 (USDC-based)
+- **支付协议**: x402 (定义交易规范)
+- **支付代币**: 自定义 USDC 测试代币
 - **支持钱包**: Phantom, Solflare, Torus
 
 ### 后端
@@ -144,17 +202,17 @@ x402's Pixel War/
 - ✅ 颜色选择器
 - ✅ 价格计算和显示
 - ✅ 余额检查
-- ✅ **Mock x402 支付系统** (Day 1 完成 🎉)
+- ✅ **真实 Testnet 支付系统** (真实区块链交易)
 - ✅ **单个像素占领逻辑** (前端 + 后端)
 - ✅ **批量像素占领逻辑** (前端 + 后端)
 - ✅ **Supabase RPC 函数** (钱包桥接)
+- ✅ **USDC 水龙头 API** (每 24 小时 100 代币)
+- ✅ **交易验证和确认**
 
 ### 🚧 开发中
-- 🚧 数据库迁移执行 (需手动在 Supabase 运行 SQL)
-- 🚧 端到端测试和优化
-- 🚧 真实 x402 支付集成 (PayAI) - 目前使用 mock
 - 🚧 交易历史面板
 - 🚧 排行榜
+- 🚧 性能优化和监控
 
 ### 📋 计划功能
 - 📋 NFT 铸造（像素所有权证明）
@@ -193,19 +251,26 @@ Alice 占领 Bob 的像素（当前价格: 1.0 x402）:
 
 ### 测试环境设置
 
-1. **使用 Solana Devnet** (推荐用于开发)
+1. **使用 Solana Testnet** (推荐用于开发和演示)
 ```bash
 # .env.local
-NEXT_PUBLIC_SOLANA_NETWORK=devnet
+NEXT_PUBLIC_SOLANA_NETWORK=testnet
+NEXT_PUBLIC_SOLANA_RPC_URL=https://api.testnet.solana.com
 ```
 
-2. **获取测试 SOL 和 USDC**
+2. **创建测试 USDC 代币** (仅管理员需要)
 ```bash
-# 运行设置脚本
-./scripts/setup-test-usdc.sh
+# 运行代币创建脚本
+cd scripts
+./create-token.sh
 ```
 
-详细文档: [获取测试代币指南](docs/HOW_TO_GET_DEVNET_USDC.md)
+3. **获取测试代币** (用户)
+- 访问应用并连接钱包
+- 点击 "获取测试 USDC" 按钮
+- 每 24 小时可领取 100 个测试 USDC
+
+详细文档: [Testnet 设置指南](docs/TESTNET_SETUP.md)
 
 ### 数据库架构
 
@@ -232,14 +297,21 @@ NEXT_PUBLIC_SOLANA_NETWORK=devnet
 npx tsx scripts/check-wallet.ts <你的钱包地址>
 ```
 
-3. **在线查看钱包**:
-   - Solana Explorer: https://explorer.solana.com/?cluster=devnet
-   - Solscan: https://solscan.io/?cluster=devnet
+3. **在线查看钱包和交易**:
+   - Solana Explorer: https://explorer.solana.com/?cluster=testnet
+   - 粘贴钱包地址或交易签名查看详情
 
 ## 📚 相关文档
 
-- [钱包设置指南](docs/WALLET_SETUP.md) - 详细的钱包配置说明
-- [获取测试代币](docs/HOW_TO_GET_DEVNET_USDC.md) - 如何获取测试 SOL 和 USDC
+### 设置和配置
+- [Testnet 设置指南](docs/TESTNET_SETUP.md) - 完整的 Testnet 代币创建和配置指南
+- [部署指南](docs/DEPLOYMENT.md) - Vercel 部署和环境变量配置
+- [数据库设置](docs/SETUP_DATABASE.md) - Supabase 数据库初始化
+
+### 开发和使用
+- [用户手册](docs/USER_GUIDE.md) - 如何玩游戏和占领像素
+- [API 文档](docs/API.md) - API 端点和 RPC 函数
+- [架构设计](docs/ARCHITECTURE.md) - 技术架构和设计决策
 
 ## 🤝 贡献
 
@@ -263,4 +335,4 @@ MIT License
 
 ---
 
-**注意**: 这是一个演示项目，用于学习 Solana 开发和 x402 支付协议。请勿在主网上使用真实资金进行测试。
+**注意**: 这是一个演示项目，用于学习 Solana 开发和 x402 支付协议。目前使用 Solana Testnet，所有交易都是真实的链上交易，但使用的是测试代币（无真实价值）。部署到 Mainnet 前请进行充分测试。
