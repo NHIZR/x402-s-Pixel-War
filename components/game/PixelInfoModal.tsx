@@ -24,7 +24,7 @@ import {
 import { conquerPixel, recolorPixel } from '@/lib/services/pixelConquest';
 
 export function PixelInfoModal() {
-  const { connected } = useWallet();
+  const { connected, publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
   const { walletAddress, balance } = useUserStore();
   const { selectedPixel, selectPixel } = useGameStore();
@@ -39,7 +39,7 @@ export function PixelInfoModal() {
   const warTax = calculateWarTax(selectedPixel.currentPrice);
 
   const handleConquer = async () => {
-    if (!connected || !walletAddress) {
+    if (!connected || !walletAddress || !publicKey) {
       toast.error('请先连接钱包', {
         description: '需要连接 Solana 钱包才能占领像素'
       });
@@ -123,7 +123,8 @@ export function PixelInfoModal() {
     try {
       const result = await conquerPixel(
         connection,
-        walletAddress,
+        publicKey,
+        sendTransaction,
         selectedPixel.x,
         selectedPixel.y,
         selectedColor,

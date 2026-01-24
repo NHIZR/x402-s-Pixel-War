@@ -2,14 +2,14 @@
  * Pixel Conquest Service
  *
  * Handles the complete flow of conquering pixels:
- * 1. Payment via mock x402
+ * 1. Payment via x402 (real SPL token transfers)
  * 2. Database update via Supabase RPC
  * 3. Real-time synchronization
  */
 
-import { Connection } from '@solana/web3.js';
+import { Connection, PublicKey } from '@solana/web3.js';
 import { createClient } from '@/lib/supabase/client';
-import { mockX402Payment, mockBatchPayment, PaymentResult } from '@/lib/solana/mockPayment';
+import { processPayment, PaymentResult } from '@/lib/services/x402Payment';
 
 export interface ConquestResult {
   success: boolean;
@@ -46,17 +46,21 @@ export interface BatchConquestResult {
  */
 export async function conquerPixel(
   connection: Connection,
-  walletAddress: string,
+  walletPublicKey: PublicKey,
+  sendTransaction: any,
   pixelX: number,
   pixelY: number,
   color: string,
   price: number
 ): Promise<ConquestResult> {
   try {
-    // Step 1: Process payment
-    const paymentResult: PaymentResult = await mockX402Payment(
+    const walletAddress = walletPublicKey.toBase58();
+
+    // Step 1: Process payment via real SPL token transfer
+    const paymentResult: PaymentResult = await processPayment(
       connection,
-      walletAddress,
+      walletPublicKey,
+      sendTransaction,
       price
     );
 
@@ -116,17 +120,20 @@ export async function conquerPixel(
  */
 export async function conquerPixelsBatch(
   connection: Connection,
-  walletAddress: string,
+  walletPublicKey: PublicKey,
+  sendTransaction: any,
   pixels: Array<{ x: number; y: number; color: string; price: number }>,
   totalPrice: number
 ): Promise<BatchConquestResult> {
   try {
-    // Step 1: Process batch payment
-    const paymentResult: PaymentResult = await mockBatchPayment(
+    const walletAddress = walletPublicKey.toBase58();
+
+    // Step 1: Process batch payment via real SPL token transfer
+    const paymentResult: PaymentResult = await processPayment(
       connection,
-      walletAddress,
-      totalPrice,
-      pixels.length
+      walletPublicKey,
+      sendTransaction,
+      totalPrice
     );
 
     if (!paymentResult.success) {

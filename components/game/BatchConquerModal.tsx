@@ -28,7 +28,7 @@ interface BatchConquerModalProps {
 }
 
 export function BatchConquerModal({ open, onClose }: BatchConquerModalProps) {
-  const { connected } = useWallet();
+  const { connected, publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
   const { walletAddress, balance } = useUserStore();
   const { selectedPixels, clearSelection } = useGameStore();
@@ -56,7 +56,7 @@ export function BatchConquerModal({ open, onClose }: BatchConquerModalProps) {
   const canRecolor = connected && ownedPixels.length > 0;
 
   const handleConquer = async () => {
-    if (!connected || !walletAddress) {
+    if (!connected || !walletAddress || !publicKey) {
       toast.error('请先连接钱包', {
         description: '需要连接 Solana 钱包才能操作'
       });
@@ -112,7 +112,8 @@ export function BatchConquerModal({ open, onClose }: BatchConquerModalProps) {
 
         const conquerResult = await conquerPixelsBatch(
           connection,
-          walletAddress,
+          publicKey,
+          sendTransaction,
           pixelsToConquer,
           conquerablePrice
         );
