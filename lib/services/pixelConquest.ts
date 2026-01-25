@@ -5,11 +5,26 @@
  * 1. Payment via x402 (real SPL token transfers)
  * 2. Database update via Supabase RPC
  * 3. Real-time synchronization
+ *
+ * NOTE: This service uses direct SPL token transfers.
+ * For X402 protocol integration, see:
+ * - lib/services/x402PaymentV2.ts (X402 client)
+ * - app/api/x402/conquer-pixel/route.ts (X402 server)
+ *
+ * TODO: Integrate X402 protocol flow when ready
  */
 
 import { Connection, PublicKey } from '@solana/web3.js';
 import { createClient } from '@/lib/supabase/client';
 import { processPayment, PaymentResult } from '@/lib/services/x402Payment';
+import { FEATURES } from '@/lib/config/features';
+
+// Display warning if X402 is enabled but not fully integrated
+if (typeof window !== 'undefined' && FEATURES.enableX402) {
+  console.warn('⚠️ X402 is enabled but pixelConquest still uses direct SPL transfers');
+  console.warn('💡 For full X402 integration, the game logic needs to be updated');
+  console.warn('📚 See: docs/X402_BACKEND_API.md for implementation details');
+}
 
 export interface ConquestResult {
   success: boolean;
