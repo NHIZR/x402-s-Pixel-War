@@ -61,13 +61,17 @@ export function WalletConnectionGuide() {
             <p className="mt-1">
               点击右上角的{' '}
               <span className="inline-flex items-center px-2 py-0.5 bg-cyan-600 text-white rounded text-xs font-medium">
-                💧 领取
+                💧 领取 USDC
               </span>{' '}
               按钮获取免费测试代币！
             </p>
+            <p className="mt-2 text-xs text-gray-400">
+              💡 提示：如果钱包显示 "insufficient SOL" 警告，可以安全地点击 "Confirm anyway"。
+              Faucet 会支付账户创建费用，您只需少量 SOL 支付交易费。
+            </p>
           </div>
         ),
-        duration: 8000,
+        duration: 10000,
       });
 
       // Mark as shown

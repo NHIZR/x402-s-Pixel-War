@@ -31,6 +31,8 @@
 ### 区块链相关
 - **[TESTNET_SETUP.md](./TESTNET_SETUP.md)** - Solana Devnet Token 创建完整指南
 - **[TESTING_GUIDE.md](./TESTING_GUIDE.md)** - x402 支付功能完整测试（500+ 行）
+- **[X402_INTEGRATION_GUIDE.md](./X402_INTEGRATION_GUIDE.md)** - PayAI x402 SDK 集成指南
+- **[FAQ.md](./FAQ.md)** - 常见问题（Phantom 警告、余额等）
 
 ### 部署和用户
 - **[DEPLOYMENT.md](./DEPLOYMENT.md)** - 生产环境部署指南

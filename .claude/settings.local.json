@@ -47,7 +47,13 @@
       "Bash(gtimeout 10 solana balance:*)",
       "Bash(solana-test-validator:*)",
       "Bash(solana-keygen new:*)",
-      "Bash(node get-faucet-key.js:*)"
+      "Bash(node get-faucet-key.js:*)",
+      "Bash(git push:*)",
+      "Bash(solana config:*)",
+      "Bash(solana transfer:*)",
+      "Bash(echo:*)",
+      "Bash(npm run check-wallet:*)",
+      "Bash(npx bs58 encode:*)"
     ]
   }
 }

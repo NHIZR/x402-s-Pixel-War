@@ -104,12 +104,18 @@ export async function distributeFaucetTokens(
     }
 
     // Add instruction to create recipient token account if it doesn't exist
+    // 注意：Faucet 钱包支付创建账户的租金（约 0.00203928 SOL）
+    // 用户钱包只需支付交易手续费（约 0.00001 SOL）
+    // Phantom 钱包可能会显示 "insufficient SOL" 警告，但这是误报：
+    // - Phantom 的预检查可能误判用户需要支付账户创建成本
+    // - 实际上 Faucet（payer）会支付这部分费用
+    // - 用户可以安全地点击 "Confirm anyway"，交易会成功
     if (!recipientAccountExists) {
       transaction.add(
         createAssociatedTokenAccountInstruction(
-          faucetKeypair.publicKey, // payer
+          faucetKeypair.publicKey, // payer (Faucet 支付账户创建租金)
           recipientTokenAccount, // associated token account
-          recipientPublicKey, // owner
+          recipientPublicKey, // owner (用户拥有账户)
           usdcMintPublicKey // mint
         )
       );

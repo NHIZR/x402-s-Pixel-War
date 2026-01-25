@@ -1,8 +1,8 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 
-// Devnet USDC Mint Address (官方测试代币)
-const DEVNET_USDC_MINT = 'Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr';
+// USDC Mint Address - 从环境变量读取，确保与 Faucet 使用的地址一致
+const USDC_MINT = process.env.NEXT_PUBLIC_USDC_MINT_ADDRESS || 'GGZQ8ddsdZKh9iEUxMJPKpnYTugLRk3ebs5dw1qWKDTe';
 
 /**
  * 获取钱包的 USDC 余额
@@ -16,7 +16,7 @@ export async function getUSDCBalance(
 ): Promise<number> {
   try {
     const publicKey = new PublicKey(walletAddress);
-    const mintPublicKey = new PublicKey(DEVNET_USDC_MINT);
+    const mintPublicKey = new PublicKey(USDC_MINT);
 
     // 获取与该 mint 关联的所有 token 账户
     const tokenAccounts = await connection.getParsedTokenAccountsByOwner(

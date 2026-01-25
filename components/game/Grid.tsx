@@ -12,7 +12,6 @@ import { BatchConquerModal } from './BatchConquerModal';
 import { UserInfo } from './UserInfo';
 import { LoadingScreen } from '@/components/ui/loading';
 import { Button } from '@/components/ui/button';
-import { FaucetButton } from '@/components/FaucetButton';
 import { WalletConnectionGuide } from '@/components/WalletConnectionGuide';
 import type { Pixel as PixelType } from '@/lib/types/game.types';
 import { PIXEL_FLASH_DURATION, REALTIME_CHANNEL } from '@/lib/constants/game';
@@ -275,9 +274,8 @@ export function Grid() {
         </a>
       </div>
 
-      {/* 用户信息和水龙头按钮 */}
-      <div className="fixed top-4 right-4 z-10 flex items-center gap-3">
-        <FaucetButton />
+      {/* 用户信息 */}
+      <div className="fixed top-4 right-4 z-10">
         <UserInfo />
       </div>
 
