@@ -31,8 +31,13 @@
 ### 区块链相关
 - **[TESTNET_SETUP.md](./TESTNET_SETUP.md)** - Solana Devnet Token 创建完整指南
 - **[TESTING_GUIDE.md](./TESTING_GUIDE.md)** - x402 支付功能完整测试（500+ 行）
-- **[X402_INTEGRATION_GUIDE.md](./X402_INTEGRATION_GUIDE.md)** - PayAI x402 SDK 集成指南
+- **[X402_INTEGRATION_GUIDE.md](./X402_INTEGRATION_GUIDE.md)** - PayAI x402 SDK 集成分析
 - **[FAQ.md](./FAQ.md)** - 常见问题（Phantom 警告、余额等）
+
+### X402 协议（实验性）
+- **[X402_TESTING_GUIDE.md](./X402_TESTING_GUIDE.md)** - X402 完整测试指南
+- **[X402_BACKEND_API.md](./X402_BACKEND_API.md)** - X402 后端 API 文档
+- **分支**: `experiment/x402-integration` - X402 协议完整实现
 
 ### 部署和用户
 - **[DEPLOYMENT.md](./DEPLOYMENT.md)** - 生产环境部署指南
