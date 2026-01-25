@@ -305,12 +305,11 @@ npx tsx scripts/check-wallet.ts <你的钱包地址>
 
 ## 📚 相关文档
 
-### 设置和配置
-- [Testnet 设置指南](docs/TESTNET_SETUP.md) - 完整的 Testnet 代币创建和配置指南
-- [部署指南](docs/DEPLOYMENT.md) - Vercel 部署和环境变量配置
-- [数据库设置](docs/SETUP_DATABASE.md) - Supabase 数据库初始化
+**📖 [完整文档索引](docs/DOCS_INDEX.md)** - 查看所有技术文档和指南
 
-### 开发和使用
+### 快速链接
+- **[HACKATHON.md](docs/HACKATHON.md)** - 🏆 一站式项目文档（推荐从这里开始）
+- [Testnet 设置指南](docs/TESTNET_SETUP.md) - 完整的 Testnet 代币创建和配置指南
 - [用户手册](docs/USER_GUIDE.md) - 如何玩游戏和占领像素
 - [API 文档](docs/API.md) - API 端点和 RPC 函数
 - [架构设计](docs/ARCHITECTURE.md) - 技术架构和设计决策
