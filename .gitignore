@@ -51,3 +51,12 @@ wallets/
 !package-lock.json
 !tsconfig.json
 !next.json
+
+# Solana Test Ledger
+test-ledger/
+*-ledger/
+.local/share/solana/
+
+# Temporary files
+get-faucet-key.js
+*.log
