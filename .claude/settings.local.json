@@ -35,7 +35,19 @@
       "Bash(tee:*)",
       "Bash(solana config set:*)",
       "Bash(~/.cargo/bin/spl-token:*)",
-      "Bash(./scripts/create-devnet-token.sh:*)"
+      "Bash(./scripts/create-devnet-token.sh:*)",
+      "Bash(ping:*)",
+      "Bash(scutil --proxy:*)",
+      "Bash(env)",
+      "Bash(nslookup:*)",
+      "Bash(killall:*)",
+      "Bash(pkill:*)",
+      "Bash(sudo dscacheutil:*)",
+      "Bash(sudo killall:*)",
+      "Bash(gtimeout 10 solana balance:*)",
+      "Bash(solana-test-validator:*)",
+      "Bash(solana-keygen new:*)",
+      "Bash(node get-faucet-key.js:*)"
     ]
   }
 }
