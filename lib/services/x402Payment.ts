@@ -118,7 +118,11 @@ export function useX402Payment() {
       });
 
       // Send transaction
-      const txHash = await sendTransaction(transaction, connection);
+      // Skip preflight to avoid Phantom's false "insufficient SOL" warning
+    const txHash = await sendTransaction(transaction, connection, {
+      skipPreflight: true,
+      preflightCommitment: 'processed',
+    });
 
       console.log('Transaction sent:', txHash);
 
@@ -281,7 +285,11 @@ export async function processPayment(
     transaction.recentBlockhash = blockhash;
     transaction.feePayer = walletPublicKey;
 
-    const txHash = await sendTransaction(transaction, connection);
+    // Skip preflight to avoid Phantom's false "insufficient SOL" warning
+    const txHash = await sendTransaction(transaction, connection, {
+      skipPreflight: true,
+      preflightCommitment: 'processed',
+    });
 
     // Wait for confirmation
     const confirmation = await connection.confirmTransaction(

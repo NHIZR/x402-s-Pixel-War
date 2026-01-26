@@ -10,7 +10,9 @@ import { useLanguage } from '@/lib/i18n';
 import { Pixel } from './Pixel';
 import { PixelInfoModal } from './PixelInfoModal';
 import { BatchConquerModal } from './BatchConquerModal';
+import { TextToolModal } from './TextToolModal';
 import { LoadingScreen } from '@/components/ui/loading';
+import { Type } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { WalletConnectionGuide } from '@/components/WalletConnectionGuide';
 import type { Pixel as PixelType } from '@/lib/types/game.types';
@@ -33,6 +35,7 @@ export function Grid() {
   } = useGameStore();
   const [flashingPixels, setFlashingPixels] = useState<Set<string>>(new Set());
   const [showBatchModal, setShowBatchModal] = useState(false);
+  const [showTextTool, setShowTextTool] = useState(false);
   const [mounted, setMounted] = useState(false);
   const supabaseRef = useRef(createClient());
 
@@ -240,6 +243,16 @@ export function Grid() {
     <div className="flex flex-col items-center justify-center min-h-screen p-8">
       {/* 右上角按钮组 */}
       <div className="fixed top-4 right-96 z-20 flex gap-2" suppressHydrationWarning>
+        {connected && (
+          <button
+            className="px-4 py-2 bg-gray-900 hover:bg-gray-800 border border-gray-700 hover:border-cyan-400 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+            onClick={() => setShowTextTool(true)}
+            title={mounted ? (language === 'en' ? 'Text Tool' : '文字工具') : 'Text Tool'}
+          >
+            <Type className="w-4 h-4" />
+            {mounted ? (language === 'en' ? 'Text' : '文字') : 'Text'}
+          </button>
+        )}
         <button
           className="px-4 py-2 bg-gray-900 hover:bg-gray-800 border border-gray-700 hover:border-cyan-400 rounded-lg text-sm font-medium transition-colors"
           onClick={toggleLanguage}
@@ -345,6 +358,12 @@ export function Grid() {
       <BatchConquerModal
         open={showBatchModal}
         onClose={() => setShowBatchModal(false)}
+      />
+
+      {/* 文字工具弹窗 */}
+      <TextToolModal
+        open={showTextTool}
+        onClose={() => setShowTextTool(false)}
       />
     </div>
   );
