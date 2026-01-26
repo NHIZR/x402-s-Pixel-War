@@ -141,7 +141,7 @@ export const translations = {
     clickFaucetButton: 'Click the',
     faucetButtonLabel: 'Claim USDC',
     toGetFreeTokens: 'button in the top right to get free test tokens!',
-    solWarningTip: 'Tip: If wallet shows insufficient SOL warning, you can safely click Confirm anyway. The Faucet will pay account creation fees, you only need a small amount of SOL for transaction fees.',
+    solWarningTip: 'Important: Transactions require SOL for fees. If your wallet shows insufficient SOL, click the purple SOL button to get free test SOL first.',
   },
 
   zh: {
@@ -285,7 +285,7 @@ export const translations = {
     clickFaucetButton: '点击右上角的',
     faucetButtonLabel: '领取 USDC',
     toGetFreeTokens: '按钮获取免费测试代币！',
-    solWarningTip: '提示：如果钱包显示 insufficient SOL 警告，可以安全地点击 Confirm anyway。Faucet 会支付账户创建费用，您只需少量 SOL 支付交易费。',
+    solWarningTip: '重要：交易需要 SOL 支付手续费。如果钱包显示 SOL 不足，请先点击紫色 ⚡ 按钮领取免费测试 SOL。',
   },
 } as const;
 

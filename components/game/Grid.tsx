@@ -235,13 +235,13 @@ export function Grid() {
     <div className="flex flex-col items-center justify-center min-h-screen p-8">
       {/* 左上角按钮组 */}
       <div className="fixed top-4 left-4 z-10 flex gap-2">
-        {/* 语言切换按钮 */}
+        {/* 语言切换按钮：英文界面显示"中"，中文界面显示"EN" */}
         <button
-          className="px-3 py-2 bg-gray-900 hover:bg-gray-800 border border-gray-700 hover:border-cyan-400 rounded text-sm font-medium transition-colors"
+          className="px-3 py-2 bg-gray-900 hover:bg-gray-800 border border-gray-700 hover:border-cyan-400 rounded text-sm font-medium transition-colors min-w-[48px]"
           onClick={toggleLanguage}
           title={t('switchLanguage')}
         >
-          🌐 {language === 'en' ? 'EN' : '中文'}
+          {language === 'en' ? '中' : 'EN'}
         </button>
 
         {/* 文档按钮 */}

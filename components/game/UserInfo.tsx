@@ -173,60 +173,45 @@ export function UserInfo() {
     );
   }
 
-  // 已登录状态
+  // 已登录状态 - 精简版（余额在右侧面板显示）
   return (
-    <div className="flex items-center gap-3 px-4 py-2 bg-gray-900/80 rounded-lg border border-gray-800 backdrop-blur-sm">
+    <div className="flex items-center gap-2 px-3 py-2 bg-gray-900/80 rounded-lg border border-gray-800 backdrop-blur-sm">
       {/* 钱包地址 */}
       <div className="flex items-center gap-2">
         <Wallet className="w-4 h-4 text-cyan-400" />
-        <div className="text-sm">
-          <div className="font-semibold text-cyan-400 font-mono">{formatAddress(walletAddress)}</div>
-          <div className="text-xs text-gray-400">{t('solanaWallet')}</div>
-        </div>
-      </div>
-
-      {/* USDC 余额 */}
-      <div className="border-l border-gray-700 pl-3">
-        <div className="text-xs text-gray-500">{t('usdcBalance')}</div>
-        <div className="text-sm font-mono font-medium text-cyan-400">{balance.toFixed(2)} USDC</div>
+        <span className="text-sm font-mono text-cyan-400">{formatAddress(walletAddress)}</span>
       </div>
 
       {/* 领取按钮组 */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 border-l border-gray-700 pl-2">
         {/* 领取 USDC */}
         <button
           onClick={handleClaimTokens}
           disabled={claiming}
-          className="px-3 py-1 text-xs bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded transition-colors"
+          className="px-2 py-1 text-xs bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded transition-colors"
           title={t('claimUSDC')}
         >
-          {claiming ? (
-            <>
-              <span className="inline-block animate-spin mr-1">⏳</span>
-              {t('claiming')}
-            </>
-          ) : (
-            <>💧 {t('claimUSDC')}</>
-          )}
+          {claiming ? '⏳' : '💧'}
         </button>
 
         {/* 领取 SOL */}
         <button
           onClick={handleClaimSOL}
-          className="px-3 py-1 text-xs bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors"
+          className="px-2 py-1 text-xs bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors"
           title={t('claimSOL')}
         >
-          ⚡ {t('claimSOL')}
+          ⚡
+        </button>
+
+        {/* 断开连接 */}
+        <button
+          onClick={() => disconnect()}
+          className="px-2 py-1 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors"
+          title={t('disconnect')}
+        >
+          ✕
         </button>
       </div>
-
-      {/* 断开连接 */}
-      <button
-        onClick={() => disconnect()}
-        className="px-3 py-1 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors"
-      >
-        {t('disconnect')}
-      </button>
     </div>
   );
 }
