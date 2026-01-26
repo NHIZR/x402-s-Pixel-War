@@ -310,6 +310,14 @@ export function Grid() {
         >
           {mounted ? t('docs') : 'Docs'}
         </a>
+        <a
+          href="https://github.com/NHIZR/x402-s-Pixel-War"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-4 py-2 bg-gray-900/90 hover:bg-gray-800 border border-gray-700 hover:border-cyan-400 rounded-lg text-sm font-medium transition-all hover:shadow-lg backdrop-blur-sm"
+        >
+          GitHub
+        </a>
       </div>
 
       {/* 像素网格容器 */}
