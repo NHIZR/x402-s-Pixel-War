@@ -74,7 +74,7 @@ export function Grid() {
         return;
       }
 
-      const grid: PixelType[][] = Array.from({ length: 36 }, () => []);
+      const grid: PixelType[][] = Array.from({ length: 56 }, () => []);
 
       (data as any[]).forEach((pixel: any) => {
         grid[pixel.y][pixel.x] = {
@@ -282,11 +282,11 @@ export function Grid() {
       </div>
 
       <div
-        className="grid gap-0 bg-cyber-black p-3 rounded-lg border border-gray-800 w-full max-w-[1400px] mx-auto"
+        className="grid gap-0 bg-cyber-black p-3 rounded-lg border border-gray-800 w-full max-w-[1600px] mx-auto"
         style={{
-          gridTemplateColumns: 'repeat(64, minmax(0, 1fr))',
-          aspectRatio: '64 / 36',
-          maxHeight: '70vh',
+          gridTemplateColumns: 'repeat(100, minmax(0, 1fr))',
+          aspectRatio: '100 / 56',
+          maxHeight: '75vh',
         }}
       >
         {pixels.map((row, y) =>
