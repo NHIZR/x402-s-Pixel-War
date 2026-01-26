@@ -20,7 +20,7 @@ export const translations = {
     // Game Instructions
     payToConquer: 'Pay',
     toConquerPixels: 'to conquer pixels, hold',
-    andDragToSelect: '+ drag to multi-select',
+    andDragToSelect: 'drag to multi-select',
     startingPrice: 'Starting price',
     priceIncrease: 'price increases',
     perConquest: 'per conquest',
@@ -143,6 +143,11 @@ export const translations = {
     faucetButtonLabel: 'Claim USDC',
     toGetFreeTokens: 'button in the top right to get free test tokens!',
     solWarningTip: 'Important: Transactions require SOL for fees. If your wallet shows insufficient SOL, click the purple SOL button to get free test SOL first.',
+
+    // Dashboard Notice
+    testingNotice: 'Testing on Devnet.',
+    devnetInstructions: 'Phantom: Settings → Developer Settings → Enable Testnet Mode → Select Devnet',
+    docsLink: 'Docs',
   },
 
   zh: {
@@ -165,7 +170,7 @@ export const translations = {
     // Game Instructions
     payToConquer: '支付',
     toConquerPixels: '占领像素，按住',
-    andDragToSelect: '+ 拖动可多选',
+    andDragToSelect: '拖动可多选',
     startingPrice: '起始价格',
     priceIncrease: '每次占领价格上涨',
     perConquest: '',
@@ -288,6 +293,11 @@ export const translations = {
     faucetButtonLabel: '领取 USDC',
     toGetFreeTokens: '按钮获取免费测试代币！',
     solWarningTip: '重要：交易需要 SOL 支付手续费。如果钱包显示 SOL 不足，请先点击紫色 ⚡ 按钮领取免费测试 SOL。',
+
+    // Dashboard Notice
+    testingNotice: '测试网运行中。',
+    devnetInstructions: 'Phantom: 设置 → 开发者设置 → 开启测试网模式 → 选择 Devnet',
+    docsLink: '文档',
   },
 } as const;
 

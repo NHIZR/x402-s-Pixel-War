@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { Wallet, Coins, Activity, ExternalLink, Clock, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
 import { useUserStore } from '@/lib/stores/userStore';
@@ -10,6 +10,12 @@ import { useTransactionStore, Transaction } from '@/lib/stores/transactionStore'
 import { getSOLBalance, getUSDCBalance } from '@/lib/solana/balance';
 import { getSolanaExplorerUrl } from '@/lib/config/solana';
 import { useLanguage } from '@/lib/i18n';
+
+// Dynamic import to prevent SSR hydration issues
+const WalletMultiButton = dynamic(
+  () => import('@solana/wallet-adapter-react-ui').then(mod => mod.WalletMultiButton),
+  { ssr: false }
+);
 
 export function TransactionPanel() {
   const { publicKey, connected, disconnect } = useWallet();
@@ -19,6 +25,12 @@ export function TransactionPanel() {
   const { t } = useLanguage();
   const [solBalance, setSolBalance] = useState<number>(0);
   const [claimingUSDC, setClaimingUSDC] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Track mount state to prevent hydration issues
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // 获取 SOL 余额
   useEffect(() => {
@@ -188,16 +200,36 @@ export function TransactionPanel() {
   if (!connected) {
     return (
       <div className="w-80 bg-gray-900/95 border-l border-gray-800 p-4 flex flex-col h-full backdrop-blur-sm">
-        <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-800">
+        <div className="flex items-center gap-2 mb-2 pb-3 border-b border-gray-800">
           <Activity className="w-5 h-5 text-cyan-400" />
           <h2 className="text-lg font-bold text-white">{t('dashboard')}</h2>
+        </div>
+
+        {/* Testing Notice */}
+        <div className="mb-4 px-3 py-2 bg-yellow-900/20 border border-yellow-700/30 rounded text-xs text-yellow-200/80 space-y-1">
+          <div>
+            {t('testingNotice')}{' '}
+            <a
+              href="https://x402spixelwar.mintlify.app/introduction"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 hover:text-cyan-300 underline"
+            >
+              {t('docsLink')}
+            </a>
+          </div>
+          <div className="text-[10px] text-yellow-200/60">
+            {t('devnetInstructions')}
+          </div>
         </div>
 
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center text-gray-500">
             <Wallet className="w-12 h-12 mx-auto mb-3 opacity-50" />
             <p className="text-sm mb-4">{t('connectWalletToView')}</p>
-            <WalletMultiButton className="!bg-cyan-600 hover:!bg-cyan-500 !rounded-lg !py-2 !px-4" />
+            {mounted && (
+              <WalletMultiButton className="!bg-cyan-600 hover:!bg-cyan-500 !rounded-lg !py-2 !px-4" />
+            )}
           </div>
         </div>
       </div>
@@ -208,7 +240,7 @@ export function TransactionPanel() {
     <div className="w-80 bg-gray-900/95 border-l border-gray-800 flex flex-col h-full backdrop-blur-sm">
       {/* Header */}
       <div className="p-4 border-b border-gray-800">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <Activity className="w-5 h-5 text-cyan-400" />
             <h2 className="text-lg font-bold text-white">{t('dashboard')}</h2>
@@ -220,6 +252,24 @@ export function TransactionPanel() {
           >
             <LogOut className="w-4 h-4" />
           </button>
+        </div>
+
+        {/* Testing Notice */}
+        <div className="mb-3 px-2 py-1.5 bg-yellow-900/20 border border-yellow-700/30 rounded text-[10px] text-yellow-200/80 space-y-0.5">
+          <div>
+            {t('testingNotice')}{' '}
+            <a
+              href="https://x402spixelwar.mintlify.app/introduction"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 hover:text-cyan-300 underline"
+            >
+              {t('docsLink')}
+            </a>
+          </div>
+          <div className="text-[9px] text-yellow-200/50">
+            {t('devnetInstructions')}
+          </div>
         </div>
 
         {/* Wallet Address */}
