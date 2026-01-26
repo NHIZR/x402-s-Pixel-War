@@ -20,7 +20,7 @@ const WalletMultiButton = dynamic(
 export function TransactionPanel() {
   const { publicKey, connected, disconnect } = useWallet();
   const { connection } = useConnection();
-  const { walletAddress, balance: usdcBalance, setBalance } = useUserStore();
+  const { walletAddress, balance: usdcBalance, setBalance, setWalletAddress, disconnect: disconnectStore } = useUserStore();
   const { transactions, addTransaction } = useTransactionStore();
   const { t } = useLanguage();
   const [solBalance, setSolBalance] = useState<number>(0);
@@ -32,24 +32,43 @@ export function TransactionPanel() {
     setMounted(true);
   }, []);
 
-  // 获取 SOL 余额
+  // 同步钱包状态到 store
+  useEffect(() => {
+    if (connected && publicKey) {
+      const address = publicKey.toBase58();
+      setWalletAddress(address);
+    } else {
+      disconnectStore();
+    }
+  }, [connected, publicKey, setWalletAddress, disconnectStore]);
+
+  // 获取 SOL 和 USDC 余额
   useEffect(() => {
     if (!walletAddress || !connection) {
       setSolBalance(0);
+      setBalance(0);
       return;
     }
 
-    const fetchSOLBalance = async () => {
-      const sol = await getSOLBalance(connection, walletAddress);
-      setSolBalance(sol);
+    const fetchBalances = async () => {
+      try {
+        const [sol, usdc] = await Promise.all([
+          getSOLBalance(connection, walletAddress),
+          getUSDCBalance(connection, walletAddress)
+        ]);
+        setSolBalance(sol);
+        setBalance(usdc);
+      } catch (error) {
+        console.error('获取余额失败:', error);
+      }
     };
 
-    fetchSOLBalance();
+    fetchBalances();
 
     // 每 30 秒更新一次
-    const interval = setInterval(fetchSOLBalance, 30000);
+    const interval = setInterval(fetchBalances, 30000);
     return () => clearInterval(interval);
-  }, [walletAddress, connection]);
+  }, [walletAddress, connection, setBalance]);
 
   // 格式化时间
   const formatTime = (date: Date) => {
