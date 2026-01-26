@@ -8,6 +8,9 @@ import { PublicKey } from '@solana/web3.js';
 import { distributeFaucetTokens } from '@/lib/services/faucet';
 import { checkRateLimit } from '@/lib/utils/rateLimit';
 
+// Vercel Serverless Function config - extend timeout for Solana transactions
+export const maxDuration = 60; // 60 seconds (max for Hobby plan)
+
 // Constants
 const RATE_LIMIT_WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours
 const MAX_REQUESTS_PER_WINDOW = 1; // 1 request per 24 hours

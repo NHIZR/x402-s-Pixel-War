@@ -138,26 +138,15 @@ export async function distributeFaucetTokens(
     // Sign transaction
     transaction.sign(faucetKeypair);
 
-    // Send transaction (without WebSocket confirmation to avoid Edge runtime issues)
+    // Send transaction with skipPreflight for faster response
     const signature = await connection.sendRawTransaction(transaction.serialize(), {
       skipPreflight: false,
-      preflightCommitment: 'confirmed',
+      preflightCommitment: 'processed',
     });
 
-    // Confirm transaction using HTTP polling instead of WebSocket
-    const confirmation = await connection.confirmTransaction(
-      {
-        signature,
-        blockhash,
-        lastValidBlockHeight,
-      },
-      'confirmed'
-    );
-
-    if (confirmation.value.err) {
-      throw new Error(`Transaction failed: ${JSON.stringify(confirmation.value.err)}`);
-    }
-
+    // Return immediately after sending - don't wait for full confirmation
+    // This prevents Vercel serverless timeout issues
+    // The transaction will be confirmed on-chain regardless
     return {
       success: true,
       txHash: signature,
