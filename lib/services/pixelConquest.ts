@@ -10,24 +10,7 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { createClient } from '@/lib/supabase/client';
 import { processPayment, PaymentResult } from '@/lib/services/x402Payment';
-
-export interface ConquestResult {
-  success: boolean;
-  error?: string;
-  txHash?: string;
-  pixel?: {
-    x: number;
-    y: number;
-    color: string;
-    newPrice: number;
-    walletOwner: string;
-  };
-  transaction?: {
-    pricePaid: number;
-    newPrice: number;
-    previousOwner?: string;
-  };
-}
+import { ConquestResult } from '@/lib/types/game.types';
 
 export interface BatchConquestResult {
   success: boolean;

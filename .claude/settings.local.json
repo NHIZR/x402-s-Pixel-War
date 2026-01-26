@@ -59,7 +59,8 @@
       "Bash(npm run type-check:*)",
       "Bash(find:*)",
       "Bash(cd:*)",
-      "Bash(gtimeout:*)"
+      "Bash(gtimeout:*)",
+      "Bash(wc:*)"
     ]
   }
 }

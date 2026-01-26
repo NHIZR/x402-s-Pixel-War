@@ -21,6 +21,38 @@ export interface PaymentResult {
 }
 
 /**
+ * Parse payment error and return user-friendly message
+ */
+function parsePaymentError(error: any): string {
+  if (!error?.message) {
+    return '支付失败，请重试';
+  }
+
+  const msg = error.message.toLowerCase();
+
+  if (msg.includes('user rejected') || msg.includes('rejected') || msg.includes('cancelled')) {
+    return '用户取消了交易';
+  }
+  if (msg.includes('insufficient funds for rent') || msg.includes('insufficient lamports') || (msg.includes('insufficient') && msg.includes('sol'))) {
+    return 'SOL 余额不足，无法支付交易费。请先点击紫色 ⚡ 按钮领取测试 SOL';
+  }
+  if (msg.includes('insufficient') || msg.includes('not enough')) {
+    return 'USDC 余额不足';
+  }
+  if (msg.includes('token account') || msg.includes('account not found')) {
+    return '未找到 USDC 账户，请先获取一些 USDC';
+  }
+  if (msg.includes('timeout') || msg.includes('network')) {
+    return '网络错误，请重试';
+  }
+  if (msg.includes('blockhash') || msg.includes('expired')) {
+    return '交易超时，请重试';
+  }
+
+  return `支付失败: ${error.message}`;
+}
+
+/**
  * Hook for x402 payments using real SPL token transfers
  */
 export function useX402Payment() {
@@ -157,46 +189,9 @@ export function useX402Payment() {
 
     } catch (error: any) {
       console.error('Payment error:', error);
-
-      // Handle specific error types
-      let errorMessage = '支付失败，请重试';
-
-      if (error?.message) {
-        const msg = error.message.toLowerCase();
-
-        // User rejected the transaction
-        if (msg.includes('user rejected') || msg.includes('rejected') || msg.includes('cancelled')) {
-          errorMessage = '用户取消了交易';
-        }
-        // SOL insufficient for transaction fees
-        else if (msg.includes('insufficient funds for rent') || msg.includes('insufficient lamports') || (msg.includes('insufficient') && msg.includes('sol'))) {
-          errorMessage = 'SOL 余额不足，无法支付交易费。请先点击紫色 ⚡ 按钮领取测试 SOL';
-        }
-        // Insufficient USDC funds
-        else if (msg.includes('insufficient') || msg.includes('not enough')) {
-          errorMessage = 'USDC 余额不足';
-        }
-        // Token account doesn't exist
-        else if (msg.includes('token account') || msg.includes('account not found')) {
-          errorMessage = '未找到 USDC 账户，请先获取一些 USDC';
-        }
-        // Network errors
-        else if (msg.includes('timeout') || msg.includes('network')) {
-          errorMessage = '网络错误，请重试';
-        }
-        // Transaction expired
-        else if (msg.includes('blockhash') || msg.includes('expired')) {
-          errorMessage = '交易超时，请重试';
-        }
-        // Generic error with message
-        else {
-          errorMessage = `支付失败: ${error.message}`;
-        }
-      }
-
       return {
         success: false,
-        error: errorMessage,
+        error: parsePaymentError(error),
       };
     }
   };
@@ -315,33 +310,9 @@ export async function processPayment(
 
   } catch (error: any) {
     console.error('Payment error:', error);
-
-    let errorMessage = '支付失败，请重试';
-
-    if (error?.message) {
-      const msg = error.message.toLowerCase();
-
-      if (msg.includes('user rejected') || msg.includes('rejected') || msg.includes('cancelled')) {
-        errorMessage = '用户取消了交易';
-      } else if (msg.includes('insufficient funds for rent') || msg.includes('insufficient lamports') || (msg.includes('insufficient') && msg.includes('sol'))) {
-        // SOL 不足，无法支付交易费
-        errorMessage = 'SOL 余额不足，无法支付交易费。请先点击紫色 ⚡ 按钮领取测试 SOL';
-      } else if (msg.includes('insufficient') || msg.includes('not enough')) {
-        errorMessage = 'USDC 余额不足';
-      } else if (msg.includes('token account') || msg.includes('account not found')) {
-        errorMessage = '未找到 USDC 账户，请先获取一些 USDC';
-      } else if (msg.includes('timeout') || msg.includes('network')) {
-        errorMessage = '网络错误，请重试';
-      } else if (msg.includes('blockhash') || msg.includes('expired')) {
-        errorMessage = '交易超时，请重试';
-      } else {
-        errorMessage = `支付失败: ${error.message}`;
-      }
-    }
-
     return {
       success: false,
-      error: errorMessage,
+      error: parsePaymentError(error),
     };
   }
 }
