@@ -22,7 +22,7 @@ export function TransactionPanel() {
   const { connection } = useConnection();
   const { walletAddress, balance: usdcBalance, setBalance } = useUserStore();
   const { transactions, addTransaction } = useTransactionStore();
-  const { t, language, toggleLanguage } = useLanguage();
+  const { t } = useLanguage();
   const [solBalance, setSolBalance] = useState<number>(0);
   const [claimingUSDC, setClaimingUSDC] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -240,26 +240,8 @@ export function TransactionPanel() {
     <div className="w-80 bg-gray-900/95 border-l border-gray-800 flex flex-col h-full backdrop-blur-sm">
       {/* Header */}
       <div className="p-4 border-b border-gray-800">
-        <div className="flex items-center justify-between mb-2">
-          {/* 左侧：语言切换 + Docs + Dashboard */}
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <button
-              className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-cyan-400 rounded text-sm font-medium transition-colors min-w-[40px]"
-              onClick={toggleLanguage}
-              title={mounted ? t('switchLanguage') : 'Switch Language'}
-              suppressHydrationWarning
-            >
-              {mounted ? (language === 'en' ? '中' : 'EN') : '...'}
-            </button>
-            <a
-              href="https://x402spixelwar.mintlify.app/introduction"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-cyan-400 rounded text-sm font-medium transition-colors"
-              title={mounted ? t('docs') : 'Docs'}
-            >
-              📄
-            </a>
             <Activity className="w-5 h-5 text-cyan-400" />
             <h2 className="text-lg font-bold text-white" suppressHydrationWarning>
               {mounted ? t('dashboard') : 'Dashboard'}
@@ -274,21 +256,14 @@ export function TransactionPanel() {
           </button>
         </div>
 
-        {/* Testing Notice */}
-        <div className="mb-3 px-2 py-1.5 bg-yellow-900/20 border border-yellow-700/30 rounded text-[10px] text-yellow-200/80 space-y-0.5">
-          <div>
-            {t('testingNotice')}{' '}
-            <a
-              href="https://x402spixelwar.mintlify.app/introduction"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-cyan-400 hover:text-cyan-300 underline"
-            >
-              {t('docsLink')}
-            </a>
+        {/* Testing Notice - 更大更显眼 */}
+        <div className="mb-3 px-3 py-2.5 bg-yellow-900/30 border-2 border-yellow-500/50 rounded-lg space-y-1.5">
+          <div className="text-sm font-semibold text-yellow-300 flex items-center gap-2">
+            <span className="text-base">⚠️</span>
+            {mounted ? t('testingNotice') : 'Testing on Devnet'}
           </div>
-          <div className="text-[9px] text-yellow-200/50">
-            {t('devnetInstructions')}
+          <div className="text-xs text-yellow-200/70 leading-relaxed">
+            {mounted ? t('devnetInstructions') : 'Phantom: Settings → Developer Settings → Enable Testnet Mode → Select Devnet'}
           </div>
         </div>
 
