@@ -15,6 +15,10 @@
     {
       "name": "Play Game",
       "url": "https://pixel-war.vercel.app"
+    },
+    {
+      "name": "GitHub",
+      "url": "https://github.com/NHIZR/x402-s-Pixel-War"
     }
   ],
   "navigation": [
@@ -22,7 +26,8 @@
       "group": "Overview",
       "pages": [
         "introduction",
-        "roadmap"
+        "roadmap",
+        "faq"
       ]
     },
     {

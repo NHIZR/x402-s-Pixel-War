@@ -1,48 +1,103 @@
 # x402's Pixel War
 
-基于 Solana 区块链的多人像素征服游戏，使用 USDC 测试代币进行真实链上交易。
+A real-time pixel conquest game with dynamic on-chain economy, built on Solana blockchain.
 
-## 游戏机制
+基于 Solana 区块链的多人像素征服游戏，使用 USDC 进行真实链上交易。
 
-- **64×36 像素网格** - 共 2,304 个像素可争夺
-- **价格递增** - 每次占领后价格上涨 20%
-- **利润分配** - 前所有者获得本金 + 10%，平台收取 10% 战争税
-- **批量占领** - 支持 Shift + 拖拽选择多个像素
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://pixel-war.vercel.app)
+[![Docs](https://img.shields.io/badge/docs-mintlify-blue)](https://x402-pixel-war.mintlify.app)
 
-## 快速开始
+## Features
+
+- **100×56 Pixel Grid** - 5,600 pixels to conquer and defend
+- **Dynamic Pricing** - Price increases 20% after each conquest
+- **Profit System** - Previous owner gets 110% return (10% profit), 10% goes to treasury
+- **Batch Operations** - Select multiple pixels with Shift + drag
+- **Text Tool** - Draw text as pixel art with real-time preview
+- **Free Recolor** - Recolor your owned pixels for free
+- **Real-time Sync** - Instant updates via Supabase Realtime
+
+## Quick Start
 
 ```bash
-# 安装依赖
+# Install dependencies
 npm install
 
-# 配置环境变量
+# Configure environment
 cp .env.example .env.local
-# 编辑 .env.local 填入配置
+# Edit .env.local with your config
 
-# 启动开发服务器
+# Start dev server
 npm run dev
 ```
 
-访问 http://localhost:3000
+Visit http://localhost:3000
 
-## 技术栈
+## Environment Variables
 
-| 层级 | 技术 |
-|------|------|
-| 前端 | Next.js 15, React 19, TypeScript, Tailwind CSS |
-| 状态 | Zustand |
-| 区块链 | Solana Devnet, @solana/web3.js, SPL Token |
-| 数据库 | Supabase (PostgreSQL) |
-| 钱包 | Phantom, Solflare, Torus |
+Create `.env.local` with:
 
-## 文档
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
-详细文档请查看 [docs/DOCS_INDEX.md](docs/DOCS_INDEX.md)
+# Solana RPC (Helius recommended)
+NEXT_PUBLIC_SOLANA_RPC_URL=https://devnet.helius-rpc.com/?api-key=YOUR_KEY
+HELIUS_API_KEY=your_helius_api_key
 
-- [HACKATHON.md](docs/HACKATHON.md) - 完整项目文档（推荐）
-- [TESTNET_SETUP.md](docs/TESTNET_SETUP.md) - 代币设置指南
-- [ARCHITECTURE.md](docs/ARCHITECTURE.md) - 系统架构
+# USDC Token (Devnet)
+NEXT_PUBLIC_USDC_MINT=your_usdc_mint_address
+NEXT_PUBLIC_TREASURY_ADDRESS=your_treasury_wallet
 
-## 许可证
+# Faucet (for test tokens)
+FAUCET_PRIVATE_KEY=your_faucet_wallet_private_key
+```
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Framework | Next.js 15 (App Router), React 19, TypeScript |
+| Styling | Tailwind CSS, shadcn/ui |
+| State | Zustand |
+| Blockchain | Solana Devnet, SPL Token, USDC |
+| Database | Supabase (PostgreSQL + Realtime) |
+| Wallet | Phantom, Solflare, Torus |
+
+## Text Tool
+
+The Text Tool allows you to draw text as pixel art on the canvas:
+
+- Full canvas preview (100×56) with drag-and-drop positioning
+- Font size scaling with +/- controls
+- Compact color picker (recent + preset + custom HEX)
+- Input modes: Continuous text / Single letter
+- Purchase modes: Text only / Full cover (with background)
+- Smart boundary detection
+
+## Documentation
+
+- [Mintlify Docs](https://x402-pixel-war.mintlify.app) - Official documentation
+- [docs/HACKATHON.md](docs/HACKATHON.md) - Complete project overview
+- [docs/USER_GUIDE.md](docs/USER_GUIDE.md) - User manual
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - System architecture
+- [docs/API.md](docs/API.md) - API reference
+
+## Roadmap
+
+- [x] Core game (100×56 grid)
+- [x] SPL Token payment integration
+- [x] Text Tool with canvas preview
+- [x] Internationalization (EN/CN)
+- [ ] x402 Protocol integration
+- [ ] AI Agent SDK
+- [ ] Mainnet launch
+
+## License
 
 MIT License
+
+---
+
+Built with [Claude Code](https://claude.ai/claude-code)
