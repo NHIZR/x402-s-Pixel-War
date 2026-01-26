@@ -286,6 +286,14 @@ export function TransactionPanel() {
           </div>
         </div>
 
+        {/* Phantom Warning Tip */}
+        <div className="mb-3 px-3 py-2 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+          <div className="text-xs text-blue-200/80 leading-relaxed flex items-start gap-2">
+            <span className="text-sm flex-shrink-0">💡</span>
+            <span>{mounted ? t('phantomWarningTip') : 'Phantom may show "insufficient SOL" warning. Just click "Confirm anyway" to proceed.'}</span>
+          </div>
+        </div>
+
         {/* Wallet Address */}
         <div className="flex items-center gap-2 text-sm text-gray-400 mb-4">
           <Wallet className="w-4 h-4" />

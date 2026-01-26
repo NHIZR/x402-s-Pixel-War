@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { toast } from 'sonner';
-import { Type, Move, Minus, Plus } from 'lucide-react';
+import { Type, Move, Minus, Plus, ZoomIn, ZoomOut, Hand, Maximize2 } from 'lucide-react';
 import { useGameStore } from '@/lib/stores/gameStore';
 import { useUserStore } from '@/lib/stores/userStore';
 import { useTransactionStore } from '@/lib/stores/transactionStore';
@@ -65,6 +65,14 @@ export function TextToolModal({ open, onClose }: TextToolModalProps) {
 
   // 处理状态
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // 拖拽状态
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
+
+  // 缩放状态 (用于预览视图的缩放倍数)
+  const [previewScale, setPreviewScale] = useState(1);
 
   // 当前字体尺寸
   const charWidth = useCustomSize ? customWidth : FONT_SIZES[sizePreset].width;
@@ -146,6 +154,122 @@ export function TextToolModal({ open, onClose }: TextToolModalProps) {
       centerText();
     }
   }, [text, charWidth, charHeight, centerText]);
+
+  // 像素尺寸 (根据预览缩放调整)
+  const pixelSize = 6 * previewScale;
+
+  // 拖拽开始
+  const handleDragStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    if (!text) return;
+    e.preventDefault();
+    setIsDragging(true);
+
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+
+    setDragStart({ x: clientX - posX * pixelSize, y: clientY - posY * pixelSize });
+  }, [text, posX, posY, pixelSize]);
+
+  // 拖拽移动
+  const handleDragMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDragging || !dragStart || !previewRef.current) return;
+    e.preventDefault();
+
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+
+    const rect = previewRef.current.getBoundingClientRect();
+    const relativeX = clientX - rect.left;
+    const relativeY = clientY - rect.top;
+
+    // 计算新的像素位置
+    let newX = Math.round(relativeX / pixelSize - textSize.width / 2);
+    let newY = Math.round(relativeY / pixelSize - textSize.height / 2);
+
+    // 限制在画布范围内
+    newX = Math.max(0, Math.min(64 - textSize.width, newX));
+    newY = Math.max(0, Math.min(36 - textSize.height, newY));
+
+    setPosX(newX);
+    setPosY(newY);
+  }, [isDragging, dragStart, pixelSize, textSize]);
+
+  // 拖拽结束
+  const handleDragEnd = useCallback(() => {
+    setIsDragging(false);
+    setDragStart(null);
+  }, []);
+
+  // 全局鼠标/触摸事件监听
+  useEffect(() => {
+    if (isDragging) {
+      const handleGlobalMove = (e: MouseEvent | TouchEvent) => {
+        if (!previewRef.current) return;
+
+        const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+        const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+
+        const rect = previewRef.current.getBoundingClientRect();
+        const relativeX = clientX - rect.left;
+        const relativeY = clientY - rect.top;
+
+        let newX = Math.round(relativeX / pixelSize - textSize.width / 2);
+        let newY = Math.round(relativeY / pixelSize - textSize.height / 2);
+
+        newX = Math.max(0, Math.min(64 - textSize.width, newX));
+        newY = Math.max(0, Math.min(36 - textSize.height, newY));
+
+        setPosX(newX);
+        setPosY(newY);
+      };
+
+      const handleGlobalEnd = () => {
+        setIsDragging(false);
+        setDragStart(null);
+      };
+
+      window.addEventListener('mousemove', handleGlobalMove);
+      window.addEventListener('mouseup', handleGlobalEnd);
+      window.addEventListener('touchmove', handleGlobalMove);
+      window.addEventListener('touchend', handleGlobalEnd);
+
+      return () => {
+        window.removeEventListener('mousemove', handleGlobalMove);
+        window.removeEventListener('mouseup', handleGlobalEnd);
+        window.removeEventListener('touchmove', handleGlobalMove);
+        window.removeEventListener('touchend', handleGlobalEnd);
+      };
+    }
+  }, [isDragging, pixelSize, textSize]);
+
+  // 缩放字体大小
+  const handleScaleUp = useCallback(() => {
+    if (useCustomSize) {
+      setCustomWidth(Math.min(12, customWidth + 1));
+      setCustomHeight(Math.min(16, customHeight + 1));
+    } else {
+      // 切换到下一个预设尺寸
+      const sizes: FontSize[] = ['small', 'medium', 'large'];
+      const currentIdx = sizes.indexOf(sizePreset);
+      if (currentIdx < sizes.length - 1) {
+        setSizePreset(sizes[currentIdx + 1]);
+      }
+    }
+  }, [useCustomSize, customWidth, customHeight, sizePreset]);
+
+  const handleScaleDown = useCallback(() => {
+    if (useCustomSize) {
+      setCustomWidth(Math.max(3, customWidth - 1));
+      setCustomHeight(Math.max(5, customHeight - 1));
+    } else {
+      // 切换到上一个预设尺寸
+      const sizes: FontSize[] = ['small', 'medium', 'large'];
+      const currentIdx = sizes.indexOf(sizePreset);
+      if (currentIdx > 0) {
+        setSizePreset(sizes[currentIdx - 1]);
+      }
+    }
+  }, [useCustomSize, customWidth, customHeight, sizePreset]);
 
   // 处理购买
   const handlePurchase = async () => {
@@ -524,41 +648,115 @@ export function TextToolModal({ open, onClose }: TextToolModalProps) {
             )}
           </div>
 
-          {/* 预览 */}
+          {/* 交互式预览 */}
           <div>
-            <label className="block text-sm font-medium mb-2">
-              {t('preview')}
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Hand className="w-4 h-4" />
+                {t('preview')}
+              </label>
+              <div className="flex items-center gap-2">
+                {/* 文字大小缩放按钮 */}
+                <div className="flex items-center gap-1 bg-gray-800 rounded-lg px-2 py-1">
+                  <button
+                    onClick={handleScaleDown}
+                    className="p-1 hover:bg-gray-700 rounded transition-colors"
+                    title={t('scaleDown')}
+                  >
+                    <ZoomOut className="w-4 h-4" />
+                  </button>
+                  <span className="text-xs text-gray-400 min-w-[60px] text-center">
+                    {charWidth}x{charHeight}
+                  </span>
+                  <button
+                    onClick={handleScaleUp}
+                    className="p-1 hover:bg-gray-700 rounded transition-colors"
+                    title={t('scaleUp')}
+                  >
+                    <ZoomIn className="w-4 h-4" />
+                  </button>
+                </div>
+                {/* 居中按钮 */}
+                <button
+                  onClick={centerText}
+                  className="p-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+                  title={t('center')}
+                >
+                  <Maximize2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* 提示文字 */}
+            <p className="text-xs text-gray-500 mb-2">
+              {t('dragToMove')}
+            </p>
+
+            {/* 可拖拽预览区域 */}
             <div className="bg-gray-900 border border-gray-700 rounded-lg p-3 overflow-auto">
               <div
-                className="grid gap-0 mx-auto"
+                ref={previewRef}
+                className={`grid gap-0 mx-auto relative ${text ? 'cursor-grab' : 'cursor-default'} ${isDragging ? 'cursor-grabbing' : ''}`}
                 style={{
-                  gridTemplateColumns: 'repeat(64, 6px)',
+                  gridTemplateColumns: `repeat(64, ${pixelSize}px)`,
                   width: 'fit-content',
                 }}
+                onMouseDown={handleDragStart}
+                onTouchStart={handleDragStart}
               >
                 {Array.from({ length: 36 }).map((_, y) =>
                   Array.from({ length: 64 }).map((_, x) => {
                     const previewPixel = previewPixels.pixels.find(
                       (p) => p.x === x && p.y === y
                     );
-                    const isText = previewPixel?.isText;
-                    const isBg = previewPixel && !previewPixel.isText;
+                    const isTextPixel = previewPixel?.isText;
+                    const isBgPixel = previewPixel && !previewPixel.isText;
 
                     let bgColorStyle = '#1a1a2e';
-                    if (isText) bgColorStyle = textColor;
-                    else if (isBg) bgColorStyle = bgColor;
+                    if (isTextPixel) bgColorStyle = textColor;
+                    else if (isBgPixel) bgColorStyle = bgColor;
+
+                    // 标记文字边界框
+                    const isInTextBounds = text &&
+                      x >= posX && x < posX + textSize.width &&
+                      y >= posY && y < posY + textSize.height;
 
                     return (
                       <div
                         key={`${x}-${y}`}
-                        className="w-[6px] h-[6px]"
-                        style={{ backgroundColor: bgColorStyle }}
+                        style={{
+                          width: `${pixelSize}px`,
+                          height: `${pixelSize}px`,
+                          backgroundColor: bgColorStyle,
+                          boxShadow: isInTextBounds && !previewPixel
+                            ? 'inset 0 0 0 0.5px rgba(100, 200, 255, 0.2)'
+                            : 'none',
+                        }}
                       />
                     );
                   })
                 )}
+
+                {/* 文字区域高亮边框 */}
+                {text && (
+                  <div
+                    className="absolute pointer-events-none border-2 border-cyan-400/50 rounded"
+                    style={{
+                      left: `${posX * pixelSize}px`,
+                      top: `${posY * pixelSize}px`,
+                      width: `${textSize.width * pixelSize}px`,
+                      height: `${textSize.height * pixelSize}px`,
+                    }}
+                  />
+                )}
               </div>
+            </div>
+
+            {/* 位置显示 */}
+            <div className="flex items-center justify-center gap-4 mt-2 text-xs text-gray-400">
+              <span>X: <span className="font-mono text-cyan-400">{posX}</span></span>
+              <span>Y: <span className="font-mono text-cyan-400">{posY}</span></span>
+              <span>{t('size')}: <span className="font-mono text-cyan-400">{textSize.width}x{textSize.height}</span></span>
             </div>
           </div>
 

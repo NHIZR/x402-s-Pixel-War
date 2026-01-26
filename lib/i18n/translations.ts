@@ -148,6 +148,7 @@ export const translations = {
     testingNotice: 'Testing on Devnet.',
     devnetInstructions: 'Phantom: Settings → Developer Settings → Enable Testnet Mode → Select Devnet',
     docsLink: 'Docs',
+    phantomWarningTip: 'Phantom may show "insufficient SOL" warning. Just click "Confirm anyway" to proceed.',
 
     // Text Tool
     textTool: 'Text Tool',
@@ -184,6 +185,10 @@ export const translations = {
     draw: 'Draw',
     textDrawn: 'Text drawn!',
     textLabel: 'Text:',
+    dragToMove: 'Drag text to reposition, use +/- to resize',
+    scaleUp: 'Increase size',
+    scaleDown: 'Decrease size',
+    buyPixelsWithText: 'Buy Pixels with Text',
   },
 
   zh: {
@@ -334,6 +339,7 @@ export const translations = {
     testingNotice: '测试网运行中。',
     devnetInstructions: 'Phantom: 设置 → 开发者设置 → 开启测试网模式 → 选择 Devnet',
     docsLink: '文档',
+    phantomWarningTip: 'Phantom 可能显示"SOL 不足"警告，直接点击"Confirm anyway"即可继续。',
 
     // Text Tool
     textTool: '文字工具',
@@ -370,6 +376,10 @@ export const translations = {
     draw: '绘制',
     textDrawn: '文字绘制成功!',
     textLabel: '文字:',
+    dragToMove: '拖动文字调整位置，使用 +/- 调整大小',
+    scaleUp: '放大',
+    scaleDown: '缩小',
+    buyPixelsWithText: '文字购买像素',
   },
 } as const;
 

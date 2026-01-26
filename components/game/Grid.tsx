@@ -12,7 +12,7 @@ import { PixelInfoModal } from './PixelInfoModal';
 import { BatchConquerModal } from './BatchConquerModal';
 import { TextToolModal } from './TextToolModal';
 import { LoadingScreen } from '@/components/ui/loading';
-import { Type } from 'lucide-react';
+import { Type, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { WalletConnectionGuide } from '@/components/WalletConnectionGuide';
 import type { Pixel as PixelType } from '@/lib/types/game.types';
@@ -243,16 +243,6 @@ export function Grid() {
     <div className="flex flex-col items-center justify-center min-h-screen p-8">
       {/* 右上角按钮组 */}
       <div className="fixed top-4 right-96 z-20 flex gap-2" suppressHydrationWarning>
-        {connected && (
-          <button
-            className="px-4 py-2 bg-gray-900 hover:bg-gray-800 border border-gray-700 hover:border-cyan-400 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
-            onClick={() => setShowTextTool(true)}
-            title={mounted ? (language === 'en' ? 'Text Tool' : '文字工具') : 'Text Tool'}
-          >
-            <Type className="w-4 h-4" />
-            {mounted ? (language === 'en' ? 'Text' : '文字') : 'Text'}
-          </button>
-        )}
         <button
           className="px-4 py-2 bg-gray-900 hover:bg-gray-800 border border-gray-700 hover:border-cyan-400 rounded-lg text-sm font-medium transition-colors"
           onClick={toggleLanguage}
@@ -314,6 +304,21 @@ export function Grid() {
           ))
         )}
       </div>
+
+      {/* 文字购买像素悬浮按钮 - 位于像素图下方 */}
+      {connected && (
+        <div className="mt-6">
+          <button
+            className="px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 border border-cyan-400/50 rounded-xl text-base font-semibold transition-all shadow-lg hover:shadow-cyan-500/25 flex items-center gap-3 hover:scale-105"
+            onClick={() => setShowTextTool(true)}
+            suppressHydrationWarning
+          >
+            <Type className="w-5 h-5" />
+            <span>{mounted ? (language === 'en' ? 'Buy Pixels with Text' : '文字购买像素') : 'Buy Pixels with Text'}</span>
+            <Sparkles className="w-4 h-4 opacity-70" />
+          </button>
+        </div>
+      )}
 
       {/* 多选工具栏 */}
       {selectedPixels.length > 0 && (
