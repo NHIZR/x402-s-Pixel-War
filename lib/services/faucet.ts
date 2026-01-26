@@ -8,7 +8,6 @@ import {
   Keypair,
   PublicKey,
   Transaction,
-  sendAndConfirmTransaction,
 } from '@solana/web3.js';
 import {
   getAssociatedTokenAddress,
@@ -131,15 +130,33 @@ export async function distributeFaucetTokens(
       )
     );
 
-    // Send and confirm transaction
-    const signature = await sendAndConfirmTransaction(
-      connection,
-      transaction,
-      [faucetKeypair],
+    // Get recent blockhash
+    const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
+    transaction.recentBlockhash = blockhash;
+    transaction.feePayer = faucetKeypair.publicKey;
+
+    // Sign transaction
+    transaction.sign(faucetKeypair);
+
+    // Send transaction (without WebSocket confirmation to avoid Edge runtime issues)
+    const signature = await connection.sendRawTransaction(transaction.serialize(), {
+      skipPreflight: false,
+      preflightCommitment: 'confirmed',
+    });
+
+    // Confirm transaction using HTTP polling instead of WebSocket
+    const confirmation = await connection.confirmTransaction(
       {
-        commitment: 'confirmed',
-      }
+        signature,
+        blockhash,
+        lastValidBlockHeight,
+      },
+      'confirmed'
     );
+
+    if (confirmation.value.err) {
+      throw new Error(`Transaction failed: ${JSON.stringify(confirmation.value.err)}`);
+    }
 
     return {
       success: true,
