@@ -33,7 +33,13 @@ export function Grid() {
   } = useGameStore();
   const [flashingPixels, setFlashingPixels] = useState<Set<string>>(new Set());
   const [showBatchModal, setShowBatchModal] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const supabaseRef = useRef(createClient());
+
+  // Track mount state to prevent hydration issues
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const supabase = supabaseRef.current;
 
   const triggerFlash = useCallback((x: number, y: number) => {
@@ -237,18 +243,20 @@ export function Grid() {
       <WalletConnectionGuide />
 
       <div className="mb-6 text-center max-w-3xl">
-        <h1 className="text-4xl font-bold mb-3">{t('title')}</h1>
-        <p className="text-cyber-white/80 mb-2">
+        <h1 className="text-4xl font-bold mb-3" suppressHydrationWarning>
+          {mounted ? t('title') : 'Pixel War'}
+        </h1>
+        <p className="text-cyber-white/80 mb-2" suppressHydrationWarning>
           {connected ? (
             <>
-              {t('payToConquer')} <span className="text-cyan-400 font-semibold">USDC</span> {t('toConquerPixels')} <kbd className="px-1.5 py-0.5 bg-gray-800 rounded text-cyan-400 font-mono text-sm mx-1">Shift</kbd> <span className="text-cyan-400 font-semibold">+</span> {t('andDragToSelect')}
+              {mounted ? t('payToConquer') : 'Pay'} <span className="text-cyan-400 font-semibold">USDC</span> {mounted ? t('toConquerPixels') : 'to conquer pixels.'} <kbd className="px-1.5 py-0.5 bg-gray-800 rounded text-cyan-400 font-mono text-sm mx-1">Shift</kbd> <span className="text-cyan-400 font-semibold">+</span> {mounted ? t('andDragToSelect') : 'Drag to select multiple pixels'}
             </>
           ) : (
-            <span className="text-cyan-400">👁️ {t('guestMode')} - {language === 'en' ? 'Connect wallet to participate' : '连接钱包后即可参与'}</span>
+            <span className="text-cyan-400">👁️ {mounted ? t('guestMode') : 'Guest Mode'} - {mounted ? (language === 'en' ? 'Connect wallet to participate' : '连接钱包后即可参与') : 'Connect wallet to participate'}</span>
           )}
         </p>
-        <p className="text-cyber-white/70 text-sm">
-          {t('startingPrice')} <span className="text-cyan-400 font-semibold">0.01</span> USDC{language === 'en' ? ', ' : '，'}{t('priceIncrease')} <span className="text-cyan-400 font-semibold">20%</span> {t('perConquest')}
+        <p className="text-cyber-white/70 text-sm" suppressHydrationWarning>
+          {mounted ? t('startingPrice') : 'Starting price'} <span className="text-cyan-400 font-semibold">0.01</span> USDC{mounted ? (language === 'en' ? ', ' : '，') : ', '}{mounted ? t('priceIncrease') : 'price increases by'} <span className="text-cyan-400 font-semibold">20%</span> {mounted ? t('perConquest') : 'per conquest'}
         </p>
       </div>
 
@@ -280,22 +288,23 @@ export function Grid() {
       {selectedPixels.length > 0 && (
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-20">
           <div className="flex items-center gap-4 px-6 py-3 bg-gray-900 rounded-lg border border-cyan-400 shadow-2xl">
-            <div className="text-sm">
+            <div className="text-sm" suppressHydrationWarning>
               <span className="text-cyan-400 font-bold">{selectedPixels.length}</span>
-              <span className="text-gray-400 ml-1">{t('pixelsSelected')}</span>
+              <span className="text-gray-400 ml-1">{mounted ? t('pixelsSelected') : 'pixels selected'}</span>
             </div>
             <div className="h-6 w-px bg-gray-700"></div>
             <button
               onClick={clearSelection}
               className="px-4 py-1.5 text-sm bg-gray-800 hover:bg-gray-700 text-white rounded transition-colors"
+              suppressHydrationWarning
             >
-              {t('clearSelection')}
+              {mounted ? t('clearSelection') : 'Clear'}
             </button>
             <button
               onClick={() => {
                 if (!connected) {
-                  toast.error(t('connectWalletFirst'), {
-                    description: t('needSolanaWalletBatch')
+                  toast.error(mounted ? t('connectWalletFirst') : 'Connect wallet first', {
+                    description: mounted ? t('needSolanaWalletBatch') : 'You need a Solana wallet'
                   });
                 } else {
                   setShowBatchModal(true);
@@ -303,8 +312,9 @@ export function Grid() {
               }}
               className="px-4 py-1.5 text-sm bg-cyan-600 hover:bg-cyan-500 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={!connected}
+              suppressHydrationWarning
             >
-              {connected ? t('batchConquerBtn') : t('needLogin')}
+              {connected ? (mounted ? t('batchConquerBtn') : 'Batch Conquer') : (mounted ? t('needLogin') : 'Login Required')}
             </button>
           </div>
         </div>

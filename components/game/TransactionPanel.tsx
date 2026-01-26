@@ -244,23 +244,26 @@ export function TransactionPanel() {
           {/* 左侧：语言切换 + Docs + Dashboard */}
           <div className="flex items-center gap-2">
             <button
-              className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-cyan-400 rounded text-sm font-medium transition-colors"
+              className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-cyan-400 rounded text-sm font-medium transition-colors min-w-[40px]"
               onClick={toggleLanguage}
-              title={t('switchLanguage')}
+              title={mounted ? t('switchLanguage') : 'Switch Language'}
+              suppressHydrationWarning
             >
-              {language === 'en' ? '中' : 'EN'}
+              {mounted ? (language === 'en' ? '中' : 'EN') : '...'}
             </button>
             <a
               href="https://x402spixelwar.mintlify.app/introduction"
               target="_blank"
               rel="noopener noreferrer"
               className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-cyan-400 rounded text-sm font-medium transition-colors"
-              title={t('docs')}
+              title={mounted ? t('docs') : 'Docs'}
             >
               📄
             </a>
             <Activity className="w-5 h-5 text-cyan-400" />
-            <h2 className="text-lg font-bold text-white">{t('dashboard')}</h2>
+            <h2 className="text-lg font-bold text-white" suppressHydrationWarning>
+              {mounted ? t('dashboard') : 'Dashboard'}
+            </h2>
           </div>
           <button
             onClick={() => disconnect()}
