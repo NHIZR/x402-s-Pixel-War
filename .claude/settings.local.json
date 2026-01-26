@@ -58,7 +58,8 @@
       "Bash(npm run lint)",
       "Bash(npm run type-check:*)",
       "Bash(find:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(gtimeout:*)"
     ]
   }
 }
