@@ -22,7 +22,7 @@ export function TransactionPanel() {
   const { connection } = useConnection();
   const { walletAddress, balance: usdcBalance, setBalance } = useUserStore();
   const { transactions, addTransaction } = useTransactionStore();
-  const { t } = useLanguage();
+  const { t, language, toggleLanguage } = useLanguage();
   const [solBalance, setSolBalance] = useState<number>(0);
   const [claimingUSDC, setClaimingUSDC] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -241,7 +241,24 @@ export function TransactionPanel() {
       {/* Header */}
       <div className="p-4 border-b border-gray-800">
         <div className="flex items-center justify-between mb-2">
+          {/* 左侧：语言切换 + Docs + Dashboard */}
           <div className="flex items-center gap-2">
+            <button
+              className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-cyan-400 rounded text-sm font-medium transition-colors"
+              onClick={toggleLanguage}
+              title={t('switchLanguage')}
+            >
+              {language === 'en' ? '中' : 'EN'}
+            </button>
+            <a
+              href="https://x402spixelwar.mintlify.app/introduction"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-cyan-400 rounded text-sm font-medium transition-colors"
+              title={t('docs')}
+            >
+              📄
+            </a>
             <Activity className="w-5 h-5 text-cyan-400" />
             <h2 className="text-lg font-bold text-white">{t('dashboard')}</h2>
           </div>

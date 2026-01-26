@@ -18,7 +18,7 @@ import { PIXEL_FLASH_DURATION } from '@/lib/constants/game';
 
 export function Grid() {
   const { connected } = useWallet();
-  const { t, language, toggleLanguage } = useLanguage();
+  const { t, language } = useLanguage();
   const {
     pixels,
     loading,
@@ -232,28 +232,6 @@ export function Grid() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-8">
-      {/* 左上角按钮组 */}
-      <div className="fixed top-4 left-4 z-10 flex gap-2">
-        {/* 语言切换按钮：英文界面显示"中"，中文界面显示"EN" */}
-        <button
-          className="px-3 py-2 bg-gray-900 hover:bg-gray-800 border border-gray-700 hover:border-cyan-400 rounded text-sm font-medium transition-colors min-w-[48px]"
-          onClick={toggleLanguage}
-          title={t('switchLanguage')}
-        >
-          {language === 'en' ? '中' : 'EN'}
-        </button>
-
-        {/* 文档按钮 */}
-        <a
-          href="https://x402spixelwar.mintlify.app/introduction"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="px-3 py-2 bg-gray-900 hover:bg-gray-800 border border-gray-700 hover:border-cyan-400 rounded text-sm font-medium transition-colors"
-          title={t('docs')}
-        >
-          📄 {t('docs')}
-        </a>
-      </div>
 
       {/* 钱包连接引导（低余额提示） */}
       <WalletConnectionGuide />
