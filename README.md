@@ -4,7 +4,7 @@ A real-time pixel conquest game with dynamic on-chain economy, built on Solana b
 
 基于 Solana 区块链的多人像素征服游戏，使用 USDC 进行真实链上交易。
 
-[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://pixel-war.vercel.app)
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://pixel-war-ashy.vercel.app)
 [![Docs](https://img.shields.io/badge/docs-mintlify-blue)](https://x402-pixel-war.mintlify.app)
 
 ## Features
