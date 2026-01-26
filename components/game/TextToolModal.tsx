@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { toast } from 'sonner';
-import { Type, Move, Minus, Plus, ZoomIn, ZoomOut, Hand, Maximize2 } from 'lucide-react';
+import { Type, ZoomIn, ZoomOut, Hand, Maximize2 } from 'lucide-react';
 import { useGameStore } from '@/lib/stores/gameStore';
 import { useUserStore } from '@/lib/stores/userStore';
 import { useTransactionStore } from '@/lib/stores/transactionStore';
@@ -242,34 +242,29 @@ export function TextToolModal({ open, onClose }: TextToolModalProps) {
     }
   }, [isDragging, pixelSize, textSize]);
 
-  // 缩放字体大小
+  // 缩放字体大小 (最小 5x7，最大 32x36 - 可占满画布)
+  const MIN_CHAR_WIDTH = 5;
+  const MIN_CHAR_HEIGHT = 7;
+  const MAX_CHAR_WIDTH = 32;
+  const MAX_CHAR_HEIGHT = 36;
+
   const handleScaleUp = useCallback(() => {
-    if (useCustomSize) {
-      setCustomWidth(Math.min(12, customWidth + 1));
-      setCustomHeight(Math.min(16, customHeight + 1));
-    } else {
-      // 切换到下一个预设尺寸
-      const sizes: FontSize[] = ['small', 'medium', 'large'];
-      const currentIdx = sizes.indexOf(sizePreset);
-      if (currentIdx < sizes.length - 1) {
-        setSizePreset(sizes[currentIdx + 1]);
-      }
+    // 启用自定义尺寸模式进行细粒度控制
+    if (!useCustomSize) {
+      setUseCustomSize(true);
     }
-  }, [useCustomSize, customWidth, customHeight, sizePreset]);
+    setCustomWidth(Math.min(MAX_CHAR_WIDTH, customWidth + 1));
+    setCustomHeight(Math.min(MAX_CHAR_HEIGHT, customHeight + Math.round(7/5))); // 保持宽高比约 5:7
+  }, [useCustomSize, customWidth, customHeight]);
 
   const handleScaleDown = useCallback(() => {
-    if (useCustomSize) {
-      setCustomWidth(Math.max(3, customWidth - 1));
-      setCustomHeight(Math.max(5, customHeight - 1));
-    } else {
-      // 切换到上一个预设尺寸
-      const sizes: FontSize[] = ['small', 'medium', 'large'];
-      const currentIdx = sizes.indexOf(sizePreset);
-      if (currentIdx > 0) {
-        setSizePreset(sizes[currentIdx - 1]);
-      }
+    // 启用自定义尺寸模式进行细粒度控制
+    if (!useCustomSize) {
+      setUseCustomSize(true);
     }
-  }, [useCustomSize, customWidth, customHeight, sizePreset]);
+    setCustomWidth(Math.max(MIN_CHAR_WIDTH, customWidth - 1));
+    setCustomHeight(Math.max(MIN_CHAR_HEIGHT, customHeight - Math.round(7/5))); // 保持宽高比约 5:7
+  }, [useCustomSize, customWidth, customHeight]);
 
   // 处理购买
   const handlePurchase = async () => {
@@ -491,144 +486,6 @@ export function TextToolModal({ open, onClose }: TextToolModalProps) {
             </p>
           </div>
 
-          {/* 尺寸控制 */}
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              {t('size')}
-            </label>
-
-            {/* 预设尺寸 */}
-            <div className="flex gap-2 mb-3">
-              {(Object.keys(FONT_SIZES) as FontSize[]).map((size) => (
-                <button
-                  key={size}
-                  onClick={() => {
-                    setSizePreset(size);
-                    setUseCustomSize(false);
-                  }}
-                  className={`flex-1 px-3 py-2 rounded-lg border text-sm transition-colors ${
-                    !useCustomSize && sizePreset === size
-                      ? 'bg-cyan-600 border-cyan-400 text-white'
-                      : 'bg-gray-900 border-gray-700 hover:border-gray-600'
-                  }`}
-                >
-                  {size === 'small' ? t('small') : size === 'medium' ? t('medium') : t('large')}
-                  <span className="text-xs opacity-70 ml-1">
-                    ({FONT_SIZES[size].width}x{FONT_SIZES[size].height})
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            {/* 自定义尺寸 */}
-            <div className="bg-gray-900 border border-gray-700 rounded-lg p-3">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-400">
-                  {t('customSize')}
-                </span>
-                <button
-                  onClick={() => setUseCustomSize(!useCustomSize)}
-                  className={`px-2 py-1 text-xs rounded ${
-                    useCustomSize
-                      ? 'bg-cyan-600 text-white'
-                      : 'bg-gray-800 text-gray-400'
-                  }`}
-                >
-                  {useCustomSize ? t('on') : t('off')}
-                </button>
-              </div>
-
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <label className="text-xs text-gray-500">
-                    {t('width')}
-                  </label>
-                  <div className="flex items-center gap-2 mt-1">
-                    <button
-                      onClick={() => setCustomWidth(Math.max(3, customWidth - 1))}
-                      disabled={!useCustomSize}
-                      className="p-1 bg-gray-800 rounded disabled:opacity-50"
-                    >
-                      <Minus className="w-4 h-4" />
-                    </button>
-                    <span className="flex-1 text-center font-mono">{customWidth}</span>
-                    <button
-                      onClick={() => setCustomWidth(Math.min(12, customWidth + 1))}
-                      disabled={!useCustomSize}
-                      className="p-1 bg-gray-800 rounded disabled:opacity-50"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <label className="text-xs text-gray-500">
-                    {t('height')}
-                  </label>
-                  <div className="flex items-center gap-2 mt-1">
-                    <button
-                      onClick={() => setCustomHeight(Math.max(5, customHeight - 1))}
-                      disabled={!useCustomSize}
-                      className="p-1 bg-gray-800 rounded disabled:opacity-50"
-                    >
-                      <Minus className="w-4 h-4" />
-                    </button>
-                    <span className="flex-1 text-center font-mono">{customHeight}</span>
-                    <button
-                      onClick={() => setCustomHeight(Math.min(16, customHeight + 1))}
-                      disabled={!useCustomSize}
-                      className="p-1 bg-gray-800 rounded disabled:opacity-50"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 位置控制 */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <Move className="w-4 h-4" />
-                {t('position')}
-              </label>
-              <button
-                onClick={centerText}
-                className="text-xs px-2 py-1 bg-gray-800 hover:bg-gray-700 rounded"
-              >
-                {t('center')}
-              </button>
-            </div>
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <label className="text-xs text-gray-500">X</label>
-                <input
-                  type="range"
-                  min={0}
-                  max={Math.max(0, 64 - textSize.width)}
-                  value={posX}
-                  onChange={(e) => setPosX(parseInt(e.target.value))}
-                  className="w-full"
-                />
-                <div className="text-center text-sm font-mono">{posX}</div>
-              </div>
-              <div className="flex-1">
-                <label className="text-xs text-gray-500">Y</label>
-                <input
-                  type="range"
-                  min={0}
-                  max={Math.max(0, 36 - textSize.height)}
-                  value={posY}
-                  onChange={(e) => setPosY(parseInt(e.target.value))}
-                  className="w-full"
-                />
-                <div className="text-center text-sm font-mono">{posY}</div>
-              </div>
-            </div>
-          </div>
-
           {/* 颜色选择 */}
           <div className="space-y-4">
             <div>
@@ -692,7 +549,7 @@ export function TextToolModal({ open, onClose }: TextToolModalProps) {
               {t('dragToMove')}
             </p>
 
-            {/* 可拖拽预览区域 */}
+            {/* 可拖拽预览区域 - 显示真实像素图 */}
             <div className="bg-gray-900 border border-gray-700 rounded-lg p-3 overflow-auto">
               <div
                 ref={previewRef}
@@ -712,14 +569,14 @@ export function TextToolModal({ open, onClose }: TextToolModalProps) {
                     const isTextPixel = previewPixel?.isText;
                     const isBgPixel = previewPixel && !previewPixel.isText;
 
-                    let bgColorStyle = '#1a1a2e';
-                    if (isTextPixel) bgColorStyle = textColor;
-                    else if (isBgPixel) bgColorStyle = bgColor;
+                    // 获取真实像素的颜色
+                    const realPixel = pixels[y]?.[x];
+                    const realColor = realPixel?.color || '#1a1a2e';
 
-                    // 标记文字边界框
-                    const isInTextBounds = text &&
-                      x >= posX && x < posX + textSize.width &&
-                      y >= posY && y < posY + textSize.height;
+                    // 决定显示的颜色：文字像素 > 背景像素 > 真实像素
+                    let displayColor = realColor;
+                    if (isTextPixel) displayColor = textColor;
+                    else if (isBgPixel) displayColor = bgColor;
 
                     return (
                       <div
@@ -727,10 +584,7 @@ export function TextToolModal({ open, onClose }: TextToolModalProps) {
                         style={{
                           width: `${pixelSize}px`,
                           height: `${pixelSize}px`,
-                          backgroundColor: bgColorStyle,
-                          boxShadow: isInTextBounds && !previewPixel
-                            ? 'inset 0 0 0 0.5px rgba(100, 200, 255, 0.2)'
-                            : 'none',
+                          backgroundColor: displayColor,
                         }}
                       />
                     );

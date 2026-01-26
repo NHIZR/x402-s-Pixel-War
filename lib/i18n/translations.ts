@@ -148,7 +148,8 @@ export const translations = {
     testingNotice: 'Testing on Devnet.',
     devnetInstructions: 'Phantom: Settings → Developer Settings → Enable Testnet Mode → Select Devnet',
     docsLink: 'Docs',
-    phantomWarningTip: 'Phantom may show "insufficient SOL" warning. Just click "Confirm anyway" to proceed.',
+    step1GetTokens: '1. Get SOL & USDC first by clicking the "Claim" buttons below',
+    step2PhantomWarning: '2. Phantom may show "insufficient SOL" warning - just click "Confirm anyway"',
 
     // Text Tool
     textTool: 'Text Tool',
@@ -339,7 +340,8 @@ export const translations = {
     testingNotice: '测试网运行中。',
     devnetInstructions: 'Phantom: 设置 → 开发者设置 → 开启测试网模式 → 选择 Devnet',
     docsLink: '文档',
-    phantomWarningTip: 'Phantom 可能显示"SOL 不足"警告，直接点击"Confirm anyway"即可继续。',
+    step1GetTokens: '1. 请先点击下方 "领取" 按钮获取 SOL 和 USDC',
+    step2PhantomWarning: '2. Phantom 可能显示"SOL 不足"警告，直接点击"Confirm anyway"即可',
 
     // Text Tool
     textTool: '文字工具',

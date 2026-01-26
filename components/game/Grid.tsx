@@ -314,7 +314,7 @@ export function Grid() {
             suppressHydrationWarning
           >
             <Type className="w-5 h-5" />
-            <span>{mounted ? (language === 'en' ? 'Buy Pixels with Text' : '文字购买像素') : 'Buy Pixels with Text'}</span>
+            <span>{mounted ? (language === 'en' ? 'Type Text to Conquer Pixels' : '输入文字占领像素') : 'Type Text to Conquer Pixels'}</span>
             <Sparkles className="w-4 h-4 opacity-70" />
           </button>
         </div>

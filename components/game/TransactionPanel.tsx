@@ -286,11 +286,13 @@ export function TransactionPanel() {
           </div>
         </div>
 
-        {/* Phantom Warning Tip */}
-        <div className="mb-3 px-3 py-2 bg-blue-900/20 border border-blue-500/30 rounded-lg">
-          <div className="text-xs text-blue-200/80 leading-relaxed flex items-start gap-2">
-            <span className="text-sm flex-shrink-0">💡</span>
-            <span>{mounted ? t('phantomWarningTip') : 'Phantom may show "insufficient SOL" warning. Just click "Confirm anyway" to proceed.'}</span>
+        {/* Quick Start Steps */}
+        <div className="mb-3 px-3 py-2 bg-blue-900/20 border border-blue-500/30 rounded-lg space-y-1">
+          <div className="text-xs text-blue-200/80 leading-relaxed">
+            {mounted ? t('step1GetTokens') : '1. Get SOL & USDC first by clicking the "Claim" buttons above'}
+          </div>
+          <div className="text-xs text-blue-200/60 leading-relaxed">
+            {mounted ? t('step2PhantomWarning') : '2. Phantom may show "insufficient SOL" warning - just click "Confirm anyway"'}
           </div>
         </div>
 
