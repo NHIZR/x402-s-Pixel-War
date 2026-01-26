@@ -10,7 +10,6 @@ import { useLanguage } from '@/lib/i18n';
 import { Pixel } from './Pixel';
 import { PixelInfoModal } from './PixelInfoModal';
 import { BatchConquerModal } from './BatchConquerModal';
-import { UserInfo } from './UserInfo';
 import { LoadingScreen } from '@/components/ui/loading';
 import { Button } from '@/components/ui/button';
 import { WalletConnectionGuide } from '@/components/WalletConnectionGuide';
@@ -246,7 +245,7 @@ export function Grid() {
 
         {/* 文档按钮 */}
         <a
-          href="https://github.com/NHIZR/x402-s-Pixel-War"
+          href="https://x402spixelwar.mintlify.app/introduction"
           target="_blank"
           rel="noopener noreferrer"
           className="px-3 py-2 bg-gray-900 hover:bg-gray-800 border border-gray-700 hover:border-cyan-400 rounded text-sm font-medium transition-colors"
@@ -254,11 +253,6 @@ export function Grid() {
         >
           📄 {t('docs')}
         </a>
-      </div>
-
-      {/* 用户信息 */}
-      <div className="fixed top-4 right-4 z-10">
-        <UserInfo />
       </div>
 
       {/* 钱包连接引导（低余额提示） */}

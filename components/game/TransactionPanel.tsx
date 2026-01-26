@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
-import { Wallet, Coins, Activity, ExternalLink, Clock } from 'lucide-react';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { Wallet, Coins, Activity, ExternalLink, Clock, LogOut } from 'lucide-react';
+import { toast } from 'sonner';
 import { useUserStore } from '@/lib/stores/userStore';
 import { useTransactionStore, Transaction } from '@/lib/stores/transactionStore';
 import { getSOLBalance, getUSDCBalance } from '@/lib/solana/balance';
@@ -10,12 +12,13 @@ import { getSolanaExplorerUrl } from '@/lib/config/solana';
 import { useLanguage } from '@/lib/i18n';
 
 export function TransactionPanel() {
-  const { publicKey, connected } = useWallet();
+  const { publicKey, connected, disconnect } = useWallet();
   const { connection } = useConnection();
   const { walletAddress, balance: usdcBalance, setBalance } = useUserStore();
-  const { transactions } = useTransactionStore();
+  const { transactions, addTransaction } = useTransactionStore();
   const { t } = useLanguage();
   const [solBalance, setSolBalance] = useState<number>(0);
+  const [claimingUSDC, setClaimingUSDC] = useState(false);
 
   // 获取 SOL 余额
   useEffect(() => {
@@ -94,6 +97,94 @@ export function TransactionPanel() {
     }
   };
 
+  // 领取 USDC 测试代币
+  const handleClaimUSDC = async () => {
+    if (!publicKey) return;
+
+    setClaimingUSDC(true);
+
+    try {
+      const response = await fetch('/api/faucet', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          walletAddress: publicKey.toBase58(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          toast.error(t('claimFailed'), {
+            description: data.error || t('tryAgainLater'),
+          });
+        } else {
+          toast.error(t('claimFailed'), {
+            description: data.error || t('errorOccurred'),
+          });
+        }
+        return;
+      }
+
+      const explorerUrl = getSolanaExplorerUrl('tx', data.txHash);
+
+      addTransaction({
+        type: 'faucet',
+        amount: data.amount || 100,
+        txHash: data.txHash,
+        status: 'confirmed',
+      });
+
+      toast.success(t('claimSuccess'), {
+        description: (
+          <div>
+            <p>{t('sentToWallet', { n: data.amount })}</p>
+            <a
+              href={explorerUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 hover:text-cyan-300 underline text-sm mt-1 inline-block"
+            >
+              {t('viewOnExplorer')}
+            </a>
+          </div>
+        ),
+        duration: 10000,
+      });
+
+      // Refresh balance after 2 seconds
+      setTimeout(async () => {
+        if (walletAddress && connection) {
+          const newUsdcBalance = await getUSDCBalance(connection, walletAddress);
+          setBalance(newUsdcBalance);
+        }
+      }, 2000);
+    } catch (error) {
+      console.error('Faucet claim error:', error);
+      toast.error(t('requestFailed'), {
+        description: t('networkError'),
+      });
+    } finally {
+      setClaimingUSDC(false);
+    }
+  };
+
+  // 领取 SOL - 跳转到官方 faucet
+  const handleClaimSOL = () => {
+    if (!publicKey) return;
+
+    const faucetUrl = `https://faucet.solana.com/?address=${publicKey.toBase58()}`;
+    window.open(faucetUrl, '_blank');
+
+    toast.info(t('openingSolanaFaucet'), {
+      description: t('completeSolClaimInNewWindow'),
+      duration: 5000,
+    });
+  };
+
   if (!connected) {
     return (
       <div className="w-80 bg-gray-900/95 border-l border-gray-800 p-4 flex flex-col h-full backdrop-blur-sm">
@@ -105,8 +196,8 @@ export function TransactionPanel() {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center text-gray-500">
             <Wallet className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p className="text-sm">{t('connectWalletToView')}</p>
-            <p className="text-xs mt-1">{t('balanceAndTransactions')}</p>
+            <p className="text-sm mb-4">{t('connectWalletToView')}</p>
+            <WalletMultiButton className="!bg-cyan-600 hover:!bg-cyan-500 !rounded-lg !py-2 !px-4" />
           </div>
         </div>
       </div>
@@ -117,9 +208,18 @@ export function TransactionPanel() {
     <div className="w-80 bg-gray-900/95 border-l border-gray-800 flex flex-col h-full backdrop-blur-sm">
       {/* Header */}
       <div className="p-4 border-b border-gray-800">
-        <div className="flex items-center gap-2 mb-3">
-          <Activity className="w-5 h-5 text-cyan-400" />
-          <h2 className="text-lg font-bold text-white">{t('dashboard')}</h2>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Activity className="w-5 h-5 text-cyan-400" />
+            <h2 className="text-lg font-bold text-white">{t('dashboard')}</h2>
+          </div>
+          <button
+            onClick={() => disconnect()}
+            className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded transition-colors"
+            title={t('disconnect')}
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
 
         {/* Wallet Address */}
@@ -136,13 +236,22 @@ export function TransactionPanel() {
           </a>
         </div>
 
-        {/* Balance Cards */}
+        {/* Balance Cards with Claim Buttons */}
         <div className="grid grid-cols-2 gap-3">
           {/* SOL Balance */}
           <div className="bg-gradient-to-br from-purple-900/50 to-purple-800/30 rounded-lg p-3 border border-purple-700/30">
-            <div className="flex items-center gap-1.5 text-xs text-purple-300 mb-1">
-              <span className="text-base">◎</span>
-              <span>SOL</span>
+            <div className="flex items-center justify-between text-xs text-purple-300 mb-1">
+              <div className="flex items-center gap-1.5">
+                <span className="text-base">◎</span>
+                <span>SOL</span>
+              </div>
+              <button
+                onClick={handleClaimSOL}
+                className="px-1.5 py-0.5 text-[10px] bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors"
+                title={t('claimSOL')}
+              >
+                {t('claim')}
+              </button>
             </div>
             <div className="text-lg font-bold text-white font-mono">
               {solBalance.toFixed(4)}
@@ -151,9 +260,19 @@ export function TransactionPanel() {
 
           {/* USDC Balance */}
           <div className="bg-gradient-to-br from-cyan-900/50 to-cyan-800/30 rounded-lg p-3 border border-cyan-700/30">
-            <div className="flex items-center gap-1.5 text-xs text-cyan-300 mb-1">
-              <Coins className="w-3.5 h-3.5" />
-              <span>USDC</span>
+            <div className="flex items-center justify-between text-xs text-cyan-300 mb-1">
+              <div className="flex items-center gap-1.5">
+                <Coins className="w-3.5 h-3.5" />
+                <span>USDC</span>
+              </div>
+              <button
+                onClick={handleClaimUSDC}
+                disabled={claimingUSDC}
+                className="px-1.5 py-0.5 text-[10px] bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded transition-colors"
+                title={t('claimUSDC')}
+              >
+                {claimingUSDC ? '...' : t('claim')}
+              </button>
             </div>
             <div className="text-lg font-bold text-white font-mono">
               {usdcBalance.toFixed(2)}

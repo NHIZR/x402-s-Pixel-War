@@ -13,6 +13,7 @@ export const translations = {
     usdcBalance: 'USDC Balance',
     claimUSDC: 'Claim USDC',
     claimSOL: 'Claim SOL',
+    claim: 'Claim',
     claiming: 'Claiming...',
     disconnect: 'Disconnect',
 
@@ -157,6 +158,7 @@ export const translations = {
     usdcBalance: 'USDC 余额',
     claimUSDC: '领取 USDC',
     claimSOL: '领取 SOL',
+    claim: '领取',
     claiming: '领取中...',
     disconnect: '断开',
 
