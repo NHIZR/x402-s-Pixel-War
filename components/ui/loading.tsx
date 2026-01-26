@@ -19,7 +19,7 @@ export function LoadingScreen({ message = '加载中...' }: { message?: string }
     <div className="min-h-screen flex items-center justify-center bg-cyber-black">
       <div className="text-center">
         <LoadingSpinner size="lg" />
-        <p className="mt-4 text-cyber-white/70">{message}</p>
+        <p className="mt-4 text-cyber-white/70" suppressHydrationWarning>{message}</p>
       </div>
     </div>
   );

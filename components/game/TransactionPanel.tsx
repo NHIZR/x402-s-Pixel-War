@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { Wallet, Coins, Activity, ExternalLink, Clock, LogOut } from 'lucide-react';
@@ -10,12 +10,17 @@ import { useTransactionStore, Transaction } from '@/lib/stores/transactionStore'
 import { getSOLBalance, getUSDCBalance } from '@/lib/solana/balance';
 import { getSolanaExplorerUrl } from '@/lib/config/solana';
 import { useLanguage } from '@/lib/i18n';
+import { AlertCard } from '@/components/ui/alert-card';
 
 // Dynamic import to prevent SSR hydration issues
 const WalletMultiButton = dynamic(
   () => import('@solana/wallet-adapter-react-ui').then(mod => mod.WalletMultiButton),
   { ssr: false }
 );
+
+// Balance thresholds
+const LOW_SOL_THRESHOLD = 0.01;
+const LOW_USDC_THRESHOLD = 1;
 
 export function TransactionPanel() {
   const { publicKey, connected, disconnect } = useWallet();
@@ -129,7 +134,7 @@ export function TransactionPanel() {
   };
 
   // 领取 USDC 测试代币
-  const handleClaimUSDC = async () => {
+  const handleClaimUSDC = useCallback(async () => {
     if (!publicKey) return;
 
     setClaimingUSDC(true);
@@ -201,10 +206,10 @@ export function TransactionPanel() {
     } finally {
       setClaimingUSDC(false);
     }
-  };
+  }, [publicKey, t, addTransaction, walletAddress, connection, setBalance]);
 
   // 领取 SOL - 跳转到官方 faucet
-  const handleClaimSOL = () => {
+  const handleClaimSOL = useCallback(() => {
     if (!publicKey) return;
 
     const faucetUrl = `https://faucet.solana.com/?address=${publicKey.toBase58()}`;
@@ -214,33 +219,40 @@ export function TransactionPanel() {
       description: t('completeSolClaimInNewWindow'),
       duration: 5000,
     });
-  };
+  }, [publicKey, t]);
+
+  // 判断是否需要显示各种提醒
+  const needsSol = connected && solBalance < LOW_SOL_THRESHOLD;
+  const needsUsdc = connected && usdcBalance < LOW_USDC_THRESHOLD && solBalance >= LOW_SOL_THRESHOLD;
 
   if (!connected) {
     return (
       <div className="w-80 bg-gray-900/95 border-l border-gray-800 p-4 flex flex-col h-full backdrop-blur-sm">
-        <div className="flex items-center gap-2 mb-2 pb-3 border-b border-gray-800">
+        {/* Header */}
+        <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-800">
           <Activity className="w-5 h-5 text-cyan-400" />
           <h2 className="text-lg font-bold text-white">{t('dashboard')}</h2>
         </div>
 
-        {/* Testing Notice */}
-        <div className="mb-4 px-3 py-2 bg-yellow-900/20 border border-yellow-700/30 rounded text-xs text-yellow-200/80 space-y-1">
-          <div>
-            {t('testingNotice')}{' '}
-            <a
-              href="https://x402spixelwar.mintlify.app/introduction"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-cyan-400 hover:text-cyan-300 underline"
-            >
-              {t('docsLink')}
-            </a>
-          </div>
-          <div className="text-[10px] text-yellow-200/60">
-            {t('devnetInstructions')}
-          </div>
-        </div>
+        {/* Devnet Notice - Always visible */}
+        <AlertCard
+          id="devnet-notice-disconnected"
+          type="warning"
+          title={t('alertDevnet')}
+          description={t('alertDevnetDesc')}
+          persistent={true}
+          className="mb-4"
+        />
+
+        {/* Phantom Setup Tip */}
+        <AlertCard
+          id="phantom-tip"
+          type="info"
+          title={t('phantomTip')}
+          description={t('phantomTipDesc')}
+          dismissible={true}
+          className="mb-4"
+        />
 
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center text-gray-500">
@@ -257,9 +269,9 @@ export function TransactionPanel() {
 
   return (
     <div className="w-80 bg-gray-900/95 border-l border-gray-800 flex flex-col h-full backdrop-blur-sm">
-      {/* Header */}
+      {/* Header with Title */}
       <div className="p-4 border-b border-gray-800">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Activity className="w-5 h-5 text-cyan-400" />
             <h2 className="text-lg font-bold text-white" suppressHydrationWarning>
@@ -273,27 +285,6 @@ export function TransactionPanel() {
           >
             <LogOut className="w-4 h-4" />
           </button>
-        </div>
-
-        {/* Testing Notice - 更大更显眼 */}
-        <div className="mb-3 px-3 py-2.5 bg-yellow-900/30 border-2 border-yellow-500/50 rounded-lg space-y-1.5">
-          <div className="text-sm font-semibold text-yellow-300 flex items-center gap-2">
-            <span className="text-base">⚠️</span>
-            {mounted ? t('testingNotice') : 'Testing on Devnet'}
-          </div>
-          <div className="text-xs text-yellow-200/70 leading-relaxed">
-            {mounted ? t('devnetInstructions') : 'Phantom: Settings → Developer Settings → Enable Testnet Mode → Select Devnet'}
-          </div>
-        </div>
-
-        {/* Quick Start Steps */}
-        <div className="mb-3 px-3 py-2 bg-blue-900/20 border border-blue-500/30 rounded-lg space-y-1">
-          <div className="text-xs text-blue-200/80 leading-relaxed">
-            {mounted ? t('step1GetTokens') : '1. Get SOL & USDC first by clicking the "Claim" buttons above'}
-          </div>
-          <div className="text-xs text-blue-200/60 leading-relaxed">
-            {mounted ? t('step2PhantomWarning') : '2. Phantom may show "insufficient SOL" warning - just click "Confirm anyway"'}
-          </div>
         </div>
 
         {/* Wallet Address */}
@@ -310,7 +301,7 @@ export function TransactionPanel() {
           </a>
         </div>
 
-        {/* Balance Cards with Claim Buttons */}
+        {/* Balance Cards */}
         <div className="grid grid-cols-2 gap-3">
           {/* SOL Balance */}
           <div className="bg-gradient-to-br from-purple-900/50 to-purple-800/30 rounded-lg p-3 border border-purple-700/30">
@@ -353,6 +344,57 @@ export function TransactionPanel() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Alert Messages Section */}
+      <div className="p-4 space-y-3 border-b border-gray-800">
+        {/* Devnet Notice - Always visible, persistent */}
+        <AlertCard
+          id="devnet-notice"
+          type="warning"
+          title={t('alertDevnet')}
+          description={t('alertDevnetDesc')}
+          persistent={true}
+        />
+
+        {/* SOL Required Alert */}
+        {needsSol && (
+          <AlertCard
+            id="need-sol-alert"
+            type="error"
+            title={t('alertNoSol')}
+            description={t('alertNoSolDesc')}
+            dismissible={true}
+            action={{
+              label: t('getSol'),
+              onClick: handleClaimSOL,
+            }}
+          />
+        )}
+
+        {/* USDC Required Alert */}
+        {needsUsdc && (
+          <AlertCard
+            id="need-usdc-alert"
+            type="info"
+            title={t('alertNoUsdc')}
+            description={t('alertNoUsdcDesc')}
+            dismissible={true}
+            action={{
+              label: t('getUsdc'),
+              onClick: handleClaimUSDC,
+            }}
+          />
+        )}
+
+        {/* Phantom Setup Tip - only show once */}
+        <AlertCard
+          id="phantom-setup-tip"
+          type="info"
+          title={t('phantomTip')}
+          description={t('phantomTipDesc')}
+          dismissible={true}
+        />
       </div>
 
       {/* Transaction List */}

@@ -57,8 +57,8 @@ conquer_pixel_wallet(
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `p_pixel_x` | INTEGER | ✅ | 像素 X 坐标 (0-49) |
-| `p_pixel_y` | INTEGER | ✅ | 像素 Y 坐标 (0-29) |
+| `p_pixel_x` | INTEGER | ✅ | 像素 X 坐标 (0-99) |
+| `p_pixel_y` | INTEGER | ✅ | 像素 Y 坐标 (0-55) |
 | `p_wallet_address` | VARCHAR | ✅ | 钱包地址 |
 | `p_new_color` | VARCHAR | ✅ | 新颜色 (HEX 格式, 如 "#FF0000") |
 | `p_tx_hash` | VARCHAR | ✅ | 交易哈希 |
@@ -326,7 +326,7 @@ recolor_pixels_batch(
 
 ### `get_grid_state_wallet()`
 
-获取完整的网格状态（所有 1,500 个像素）。
+获取完整的网格状态（所有 5,600 个像素）。
 
 #### 函数签名
 
@@ -353,7 +353,7 @@ get_grid_state_wallet() RETURNS JSONB
     "conquestCount": 5,
     "lastConqueredAt": "2026-01-23T12:00:00Z"
   },
-  // ... 1499 more pixels
+  // ... 5599 more pixels
 ]
 ```
 
@@ -450,7 +450,7 @@ get_user_stats(
 
 ### `initialize_grid()`
 
-初始化 50×30 像素网格（仅在首次设置时使用）。
+初始化 100×56 像素网格（仅在首次设置时使用）。
 
 #### 函数签名
 
@@ -460,7 +460,7 @@ initialize_grid() RETURNS VOID
 
 #### 说明
 
-- 创建 1,500 个像素 (50 × 30)
+- 创建 5,600 个像素 (100 × 56)
 - 初始颜色: `#0a0a0a` (深灰色)
 - 初始价格: 0.01 USDC
 - 无所有者
@@ -476,8 +476,8 @@ initialize_grid() RETURNS VOID
 ```typescript
 interface Pixel {
   id: string;              // UUID
-  x: number;               // 0-49
-  y: number;               // 0-29
+  x: number;               // 0-99
+  y: number;               // 0-55
   color: string;           // HEX color code
   currentPrice: number;    // USDC
   walletOwner: string | null;  // Wallet address
@@ -517,7 +517,7 @@ interface Transaction {
 
 | 错误消息 | 原因 | 解决方案 |
 |---------|------|---------|
-| `Pixel not found` | 坐标超出范围 | 检查 x (0-49), y (0-29) |
+| `Pixel not found` | 坐标超出范围 | 检查 x (0-99), y (0-55) |
 | `Not pixel owner` | 尝试换色别人的像素 | 只能换色自己拥有的像素 |
 | `Invalid color format` | 颜色格式错误 | 使用 HEX 格式: `#RRGGBB` |
 | `Insufficient balance` | 余额不足 | 充值 USDC |
@@ -566,8 +566,8 @@ try {
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `id` | UUID | 主键 |
-| `x` | INTEGER | X 坐标 (0-49) |
-| `y` | INTEGER | Y 坐标 (0-29) |
+| `x` | INTEGER | X 坐标 (0-99) |
+| `y` | INTEGER | Y 坐标 (0-55) |
 | `color` | VARCHAR(7) | HEX 颜色 |
 | `current_price` | DECIMAL(20,8) | 当前价格 |
 | `wallet_owner` | VARCHAR(100) | 钱包所有者 |
@@ -609,5 +609,5 @@ const channel = supabase
 
 ---
 
-**最后更新**: 2026-01-23
-**版本**: v2.0
+**最后更新**: 2026-01-26
+**版本**: v2.1

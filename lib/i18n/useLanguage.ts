@@ -4,15 +4,18 @@ import { translations, Language, TranslationKey } from './translations';
 
 interface LanguageStore {
   language: Language;
+  _hasHydrated: boolean;
   setLanguage: (lang: Language) => void;
   toggleLanguage: () => void;
   t: (key: TranslationKey, params?: Record<string, string | number>) => string;
+  setHasHydrated: (state: boolean) => void;
 }
 
 export const useLanguage = create<LanguageStore>()(
   persist(
     (set, get) => ({
       language: 'en',
+      _hasHydrated: false,
 
       setLanguage: (lang) => set({ language: lang }),
 
@@ -33,9 +36,14 @@ export const useLanguage = create<LanguageStore>()(
 
         return text;
       },
+
+      setHasHydrated: (state) => set({ _hasHydrated: state }),
     }),
     {
       name: 'pixel-war-language',
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );

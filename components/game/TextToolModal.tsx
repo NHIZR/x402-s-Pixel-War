@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { toast } from 'sonner';
-import { Type, ZoomIn, ZoomOut, Hand, Maximize2 } from 'lucide-react';
+import { Type } from 'lucide-react';
 import { useGameStore } from '@/lib/stores/gameStore';
 import { useUserStore } from '@/lib/stores/userStore';
 import { useTransactionStore } from '@/lib/stores/transactionStore';
-import { ColorPicker } from './ColorPicker';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -27,14 +26,29 @@ import {
   FONT_SIZES,
   type FontSize,
 } from '@/lib/fonts/pixelFont';
+import { GRID_WIDTH, GRID_HEIGHT } from '@/lib/constants/game';
+
+// 子组件
+import {
+  TextInput,
+  ModeSelector,
+  ColorSelector,
+  PreviewCanvas,
+  PriceInfo,
+  type InputMode,
+  type PurchaseMode,
+} from './text-tool';
 
 interface TextToolModalProps {
   open: boolean;
   onClose: () => void;
 }
 
-type InputMode = 'text' | 'single';
-type PurchaseMode = 'textOnly' | 'fullCover';
+// 尺寸常量
+const MIN_CHAR_WIDTH = 5;
+const MIN_CHAR_HEIGHT = 7;
+const MAX_CHAR_WIDTH = 32;
+const MAX_CHAR_HEIGHT = 36;
 
 export function TextToolModal({ open, onClose }: TextToolModalProps) {
   const { connected, publicKey, sendTransaction } = useWallet();
@@ -60,19 +74,11 @@ export function TextToolModal({ open, onClose }: TextToolModalProps) {
   const [posY, setPosY] = useState(0);
 
   // 颜色
-  const [textColor, setTextColor] = useState('#FF0000');
+  const [textColor, setTextColor] = useState('#FFFFFF');
   const [bgColor, setBgColor] = useState('#000000');
 
   // 处理状态
   const [isProcessing, setIsProcessing] = useState(false);
-
-  // 拖拽状态
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
-  const previewRef = useRef<HTMLDivElement>(null);
-
-  // 缩放状态 (用于预览视图的缩放倍数)
-  const [previewScale, setPreviewScale] = useState(1);
 
   // 当前字体尺寸
   const charWidth = useCustomSize ? customWidth : FONT_SIZES[sizePreset].width;
@@ -142,8 +148,8 @@ export function TextToolModal({ open, onClose }: TextToolModalProps) {
 
   // 重置位置到画布中央
   const centerText = useCallback(() => {
-    const newX = Math.max(0, Math.floor((64 - textSize.width) / 2));
-    const newY = Math.max(0, Math.floor((36 - textSize.height) / 2));
+    const newX = Math.max(0, Math.floor((GRID_WIDTH - textSize.width) / 2));
+    const newY = Math.max(0, Math.floor((GRID_HEIGHT - textSize.height) / 2));
     setPosX(newX);
     setPosY(newY);
   }, [textSize]);
@@ -155,116 +161,28 @@ export function TextToolModal({ open, onClose }: TextToolModalProps) {
     }
   }, [text, charWidth, charHeight, centerText]);
 
-  // 像素尺寸 (根据预览缩放调整)
-  const pixelSize = 6 * previewScale;
-
-  // 拖拽开始
-  const handleDragStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    if (!text) return;
-    e.preventDefault();
-    setIsDragging(true);
-
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-
-    setDragStart({ x: clientX - posX * pixelSize, y: clientY - posY * pixelSize });
-  }, [text, posX, posY, pixelSize]);
-
-  // 拖拽移动
-  const handleDragMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    if (!isDragging || !dragStart || !previewRef.current) return;
-    e.preventDefault();
-
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-
-    const rect = previewRef.current.getBoundingClientRect();
-    const relativeX = clientX - rect.left;
-    const relativeY = clientY - rect.top;
-
-    // 计算新的像素位置
-    let newX = Math.round(relativeX / pixelSize - textSize.width / 2);
-    let newY = Math.round(relativeY / pixelSize - textSize.height / 2);
-
-    // 限制在画布范围内
-    newX = Math.max(0, Math.min(64 - textSize.width, newX));
-    newY = Math.max(0, Math.min(36 - textSize.height, newY));
-
-    setPosX(newX);
-    setPosY(newY);
-  }, [isDragging, dragStart, pixelSize, textSize]);
-
-  // 拖拽结束
-  const handleDragEnd = useCallback(() => {
-    setIsDragging(false);
-    setDragStart(null);
-  }, []);
-
-  // 全局鼠标/触摸事件监听
-  useEffect(() => {
-    if (isDragging) {
-      const handleGlobalMove = (e: MouseEvent | TouchEvent) => {
-        if (!previewRef.current) return;
-
-        const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-        const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-
-        const rect = previewRef.current.getBoundingClientRect();
-        const relativeX = clientX - rect.left;
-        const relativeY = clientY - rect.top;
-
-        let newX = Math.round(relativeX / pixelSize - textSize.width / 2);
-        let newY = Math.round(relativeY / pixelSize - textSize.height / 2);
-
-        newX = Math.max(0, Math.min(64 - textSize.width, newX));
-        newY = Math.max(0, Math.min(36 - textSize.height, newY));
-
-        setPosX(newX);
-        setPosY(newY);
-      };
-
-      const handleGlobalEnd = () => {
-        setIsDragging(false);
-        setDragStart(null);
-      };
-
-      window.addEventListener('mousemove', handleGlobalMove);
-      window.addEventListener('mouseup', handleGlobalEnd);
-      window.addEventListener('touchmove', handleGlobalMove);
-      window.addEventListener('touchend', handleGlobalEnd);
-
-      return () => {
-        window.removeEventListener('mousemove', handleGlobalMove);
-        window.removeEventListener('mouseup', handleGlobalEnd);
-        window.removeEventListener('touchmove', handleGlobalMove);
-        window.removeEventListener('touchend', handleGlobalEnd);
-      };
-    }
-  }, [isDragging, pixelSize, textSize]);
-
-  // 缩放字体大小 (最小 5x7，最大 32x36 - 可占满画布)
-  const MIN_CHAR_WIDTH = 5;
-  const MIN_CHAR_HEIGHT = 7;
-  const MAX_CHAR_WIDTH = 32;
-  const MAX_CHAR_HEIGHT = 36;
-
+  // 缩放字体大小
   const handleScaleUp = useCallback(() => {
-    // 启用自定义尺寸模式进行细粒度控制
     if (!useCustomSize) {
       setUseCustomSize(true);
     }
     setCustomWidth(Math.min(MAX_CHAR_WIDTH, customWidth + 1));
-    setCustomHeight(Math.min(MAX_CHAR_HEIGHT, customHeight + Math.round(7/5))); // 保持宽高比约 5:7
+    setCustomHeight(Math.min(MAX_CHAR_HEIGHT, customHeight + Math.round(7/5)));
   }, [useCustomSize, customWidth, customHeight]);
 
   const handleScaleDown = useCallback(() => {
-    // 启用自定义尺寸模式进行细粒度控制
     if (!useCustomSize) {
       setUseCustomSize(true);
     }
     setCustomWidth(Math.max(MIN_CHAR_WIDTH, customWidth - 1));
-    setCustomHeight(Math.max(MIN_CHAR_HEIGHT, customHeight - Math.round(7/5))); // 保持宽高比约 5:7
+    setCustomHeight(Math.max(MIN_CHAR_HEIGHT, customHeight - Math.round(7/5)));
   }, [useCustomSize, customWidth, customHeight]);
+
+  // 位置变更处理
+  const handlePositionChange = useCallback((x: number, y: number) => {
+    setPosX(x);
+    setPosY(y);
+  }, []);
 
   // 处理购买
   const handlePurchase = async () => {
@@ -326,20 +244,23 @@ export function TextToolModal({ open, onClose }: TextToolModalProps) {
         totalSuccess += conquerResult.successCount;
         totalPaid += conquerResult.totalPaid;
 
-        // 更新本地状态
+        // 使用批量更新优化
         if (conquerResult.successCount > 0) {
-          for (const p of toConquer.slice(0, conquerResult.successCount)) {
+          const updates = toConquer.slice(0, conquerResult.successCount).map(p => {
             const pixel = pixels[p.y]?.[p.x];
-            if (pixel) {
-              useGameStore.getState().updatePixel(p.x, p.y, {
+            return {
+              x: p.x,
+              y: p.y,
+              data: {
                 color: p.color,
-                currentPrice: pixel.currentPrice * 1.2,
+                currentPrice: pixel ? pixel.currentPrice * 1.2 : p.price * 1.2,
                 ownerId: walletAddress,
-                conquestCount: pixel.conquestCount + 1,
+                conquestCount: pixel ? pixel.conquestCount + 1 : 1,
                 lastConqueredAt: new Date().toISOString(),
-              });
-            }
-          }
+              }
+            };
+          });
+          useGameStore.getState().updatePixelsBatch(updates);
 
           useUserStore.getState().setBalance(balance - conquerResult.totalPaid);
 
@@ -360,9 +281,12 @@ export function TextToolModal({ open, onClose }: TextToolModalProps) {
         totalSuccess += recolorResult.successCount;
 
         if (recolorResult.successCount > 0) {
-          for (const p of toRecolor) {
-            useGameStore.getState().updatePixel(p.x, p.y, { color: p.color });
-          }
+          const updates = toRecolor.map(p => ({
+            x: p.x,
+            y: p.y,
+            data: { color: p.color }
+          }));
+          useGameStore.getState().updatePixelsBatch(updates);
         }
       }
 
@@ -398,7 +322,7 @@ export function TextToolModal({ open, onClose }: TextToolModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Type className="w-5 h-5" />
@@ -411,261 +335,52 @@ export function TextToolModal({ open, onClose }: TextToolModalProps) {
 
         <div className="space-y-6">
           {/* 文字输入 */}
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              {t('textOnlyAZ')}
-            </label>
-            <input
-              type="text"
-              value={text}
-              onChange={(e) => setText(e.target.value.toUpperCase().replace(/[^A-Z ]/g, ''))}
-              placeholder={t('enterText')}
-              className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:border-cyan-400 focus:outline-none"
-              maxLength={20}
-            />
-          </div>
+          <TextInput text={text} onTextChange={setText} />
 
-          {/* 输入模式切换 */}
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              {t('inputMode')}
-            </label>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setInputMode('text')}
-                className={`flex-1 px-4 py-2 rounded-lg border transition-colors ${
-                  inputMode === 'text'
-                    ? 'bg-cyan-600 border-cyan-400 text-white'
-                    : 'bg-gray-900 border-gray-700 hover:border-gray-600'
-                }`}
-              >
-                {t('textMode')}
-              </button>
-              <button
-                onClick={() => setInputMode('single')}
-                className={`flex-1 px-4 py-2 rounded-lg border transition-colors ${
-                  inputMode === 'single'
-                    ? 'bg-cyan-600 border-cyan-400 text-white'
-                    : 'bg-gray-900 border-gray-700 hover:border-gray-600'
-                }`}
-              >
-                {t('singleLetter')}
-              </button>
-            </div>
-          </div>
-
-          {/* 购买模式 */}
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              {t('purchaseModeTool')}
-            </label>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setPurchaseMode('textOnly')}
-                className={`flex-1 px-4 py-2 rounded-lg border transition-colors ${
-                  purchaseMode === 'textOnly'
-                    ? 'bg-cyan-600 border-cyan-400 text-white'
-                    : 'bg-gray-900 border-gray-700 hover:border-gray-600'
-                }`}
-              >
-                {t('textOnly')}
-              </button>
-              <button
-                onClick={() => setPurchaseMode('fullCover')}
-                className={`flex-1 px-4 py-2 rounded-lg border transition-colors ${
-                  purchaseMode === 'fullCover'
-                    ? 'bg-cyan-600 border-cyan-400 text-white'
-                    : 'bg-gray-900 border-gray-700 hover:border-gray-600'
-                }`}
-              >
-                {t('fullCover')}
-              </button>
-            </div>
-            <p className="text-xs text-gray-400 mt-1">
-              {purchaseMode === 'textOnly' ? t('textOnlyDesc') : t('fullCoverDesc')}
-            </p>
-          </div>
+          {/* 模式选择 */}
+          <ModeSelector
+            inputMode={inputMode}
+            purchaseMode={purchaseMode}
+            onInputModeChange={setInputMode}
+            onPurchaseModeChange={setPurchaseMode}
+          />
 
           {/* 颜色选择 */}
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                {t('textColor')}
-              </label>
-              <ColorPicker color={textColor} onChange={setTextColor} />
-            </div>
-
-            {purchaseMode === 'fullCover' && (
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  {t('backgroundColor')}
-                </label>
-                <ColorPicker color={bgColor} onChange={setBgColor} />
-              </div>
-            )}
-          </div>
+          <ColorSelector
+            textColor={textColor}
+            bgColor={bgColor}
+            purchaseMode={purchaseMode}
+            onTextColorChange={setTextColor}
+            onBgColorChange={setBgColor}
+          />
 
           {/* 交互式预览 */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <Hand className="w-4 h-4" />
-                {t('preview')}
-              </label>
-              <div className="flex items-center gap-2">
-                {/* 文字大小缩放按钮 */}
-                <div className="flex items-center gap-1 bg-gray-800 rounded-lg px-2 py-1">
-                  <button
-                    onClick={handleScaleDown}
-                    className="p-1 hover:bg-gray-700 rounded transition-colors"
-                    title={t('scaleDown')}
-                  >
-                    <ZoomOut className="w-4 h-4" />
-                  </button>
-                  <span className="text-xs text-gray-400 min-w-[60px] text-center">
-                    {charWidth}x{charHeight}
-                  </span>
-                  <button
-                    onClick={handleScaleUp}
-                    className="p-1 hover:bg-gray-700 rounded transition-colors"
-                    title={t('scaleUp')}
-                  >
-                    <ZoomIn className="w-4 h-4" />
-                  </button>
-                </div>
-                {/* 居中按钮 */}
-                <button
-                  onClick={centerText}
-                  className="p-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
-                  title={t('center')}
-                >
-                  <Maximize2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* 提示文字 */}
-            <p className="text-xs text-gray-500 mb-2">
-              {t('dragToMove')}
-            </p>
-
-            {/* 可拖拽预览区域 - 显示真实像素图 */}
-            <div className="bg-gray-900 border border-gray-700 rounded-lg p-3 overflow-auto">
-              <div
-                ref={previewRef}
-                className={`grid gap-0 mx-auto relative ${text ? 'cursor-grab' : 'cursor-default'} ${isDragging ? 'cursor-grabbing' : ''}`}
-                style={{
-                  gridTemplateColumns: `repeat(64, ${pixelSize}px)`,
-                  width: 'fit-content',
-                }}
-                onMouseDown={handleDragStart}
-                onTouchStart={handleDragStart}
-              >
-                {Array.from({ length: 36 }).map((_, y) =>
-                  Array.from({ length: 64 }).map((_, x) => {
-                    const previewPixel = previewPixels.pixels.find(
-                      (p) => p.x === x && p.y === y
-                    );
-                    const isTextPixel = previewPixel?.isText;
-                    const isBgPixel = previewPixel && !previewPixel.isText;
-
-                    // 获取真实像素的颜色
-                    const realPixel = pixels[y]?.[x];
-                    const realColor = realPixel?.color || '#1a1a2e';
-
-                    // 决定显示的颜色：文字像素 > 背景像素 > 真实像素
-                    let displayColor = realColor;
-                    if (isTextPixel) displayColor = textColor;
-                    else if (isBgPixel) displayColor = bgColor;
-
-                    return (
-                      <div
-                        key={`${x}-${y}`}
-                        style={{
-                          width: `${pixelSize}px`,
-                          height: `${pixelSize}px`,
-                          backgroundColor: displayColor,
-                        }}
-                      />
-                    );
-                  })
-                )}
-
-                {/* 文字区域高亮边框 */}
-                {text && (
-                  <div
-                    className="absolute pointer-events-none border-2 border-cyan-400/50 rounded"
-                    style={{
-                      left: `${posX * pixelSize}px`,
-                      top: `${posY * pixelSize}px`,
-                      width: `${textSize.width * pixelSize}px`,
-                      height: `${textSize.height * pixelSize}px`,
-                    }}
-                  />
-                )}
-              </div>
-            </div>
-
-            {/* 位置显示 */}
-            <div className="flex items-center justify-center gap-4 mt-2 text-xs text-gray-400">
-              <span>X: <span className="font-mono text-cyan-400">{posX}</span></span>
-              <span>Y: <span className="font-mono text-cyan-400">{posY}</span></span>
-              <span>{t('size')}: <span className="font-mono text-cyan-400">{textSize.width}x{textSize.height}</span></span>
-            </div>
-          </div>
+          <PreviewCanvas
+            text={text}
+            posX={posX}
+            posY={posY}
+            textSize={textSize}
+            charWidth={charWidth}
+            charHeight={charHeight}
+            textColor={textColor}
+            bgColor={bgColor}
+            previewPixels={previewPixels.pixels}
+            pixels={pixels}
+            onPositionChange={handlePositionChange}
+            onScaleUp={handleScaleUp}
+            onScaleDown={handleScaleDown}
+            onCenter={centerText}
+          />
 
           {/* 价格信息 */}
-          <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-gray-400">
-                  {t('pixelsToConquer')}
-                </span>
-                <span className="ml-2 font-bold text-cyan-400">
-                  {priceInfo.toConquerCount}
-                </span>
-              </div>
-              <div>
-                <span className="text-gray-400">
-                  {t('ownedFreeRecolor')}
-                </span>
-                <span className="ml-2 font-bold text-green-400">
-                  {priceInfo.ownedCount}
-                </span>
-              </div>
-              <div className="col-span-2 pt-2 border-t border-gray-700">
-                <span className="text-gray-400">
-                  {t('totalCost')}
-                </span>
-                <span className="ml-2 font-bold text-xl text-cyan-400">
-                  {formatPrice(priceInfo.totalPrice)} USDC
-                </span>
-              </div>
-              {priceInfo.toConquerCount > 0 && (
-                <div className="col-span-2">
-                  <span className="text-gray-400">
-                    {t('yourBalance')}
-                  </span>
-                  <span
-                    className={`ml-2 font-mono ${
-                      balance >= priceInfo.totalPrice
-                        ? 'text-green-400'
-                        : 'text-red-400'
-                    }`}
-                  >
-                    {formatPrice(balance)} USDC
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* 警告 */}
-          {!isInBounds && text && (
-            <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-3 text-sm text-red-400">
-              {t('textOutOfBounds')}
-            </div>
-          )}
+          <PriceInfo
+            toConquerCount={priceInfo.toConquerCount}
+            ownedCount={priceInfo.ownedCount}
+            totalPrice={priceInfo.totalPrice}
+            balance={balance}
+            isInBounds={isInBounds}
+            hasText={!!text}
+          />
         </div>
 
         <DialogFooter>

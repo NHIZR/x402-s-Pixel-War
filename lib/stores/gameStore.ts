@@ -15,6 +15,7 @@ interface GameStore {
   // 操作方法
   setPixels: (pixels: Pixel[][]) => void;
   updatePixel: (x: number, y: number, updates: Partial<Pixel>) => void;
+  updatePixelsBatch: (updates: Array<{ x: number; y: number; data: Partial<Pixel> }>) => void;
   selectPixel: (pixel: Pixel | null) => void; // 选择单个像素查看详情
   togglePixelSelection: (pixel: Pixel) => void; // 切换像素选中状态
   clearSelection: () => void; // 清空选择
@@ -24,6 +25,15 @@ interface GameStore {
   setError: (error: string | null) => void;
   reset: () => void;
 }
+
+// 选择器：用于避免不必要的重渲染
+export const selectPixels = (state: GameStore) => state.pixels;
+export const selectSelectedPixel = (state: GameStore) => state.selectedPixel;
+export const selectSelectedPixels = (state: GameStore) => state.selectedPixels;
+export const selectIsSelecting = (state: GameStore) => state.isSelecting;
+export const selectIsConquering = (state: GameStore) => state.isConquering;
+export const selectLoading = (state: GameStore) => state.loading;
+export const selectError = (state: GameStore) => state.error;
 
 // 初始状态
 const initialState = {
@@ -43,16 +53,35 @@ export const useGameStore = create<GameStore>((set) => ({
   // 设置整个网格
   setPixels: (pixels) => set({ pixels, loading: false, error: null }),
 
-  // 更新单个像素（用于实时更新）
+  // 更新单个像素（用于实时更新）- O(1) 复杂度
   updatePixel: (x, y, updates) => set((state) => {
-    const newPixels = state.pixels.map((row) =>
-      row.map((pixel) => {
-        if (pixel.x === x && pixel.y === y) {
-          return { ...pixel, ...updates };
-        }
-        return pixel;
-      })
-    );
+    if (!state.pixels[y]?.[x]) return state;
+
+    // 只复制受影响的行，避免 O(n²) 操作
+    const newPixels = [...state.pixels];
+    newPixels[y] = [...newPixels[y]];
+    newPixels[y][x] = { ...newPixels[y][x], ...updates };
+
+    return { pixels: newPixels };
+  }),
+
+  // 批量更新像素（用于批量操作）- 一次性更新多个像素
+  updatePixelsBatch: (updates) => set((state) => {
+    if (updates.length === 0) return state;
+
+    const newPixels = [...state.pixels];
+    const modifiedRows = new Set<number>();
+
+    for (const { x, y, data } of updates) {
+      if (!state.pixels[y]?.[x]) continue;
+
+      if (!modifiedRows.has(y)) {
+        newPixels[y] = [...newPixels[y]];
+        modifiedRows.add(y);
+      }
+      newPixels[y][x] = { ...newPixels[y][x], ...data };
+    }
+
     return { pixels: newPixels };
   }),
 

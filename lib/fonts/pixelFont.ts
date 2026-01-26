@@ -1,6 +1,8 @@
 // 像素字体数据 - 基于 5x7 标准像素字体
 // 每个字母用二维数组表示，1 表示有像素，0 表示无像素
 
+import { GRID_WIDTH, GRID_HEIGHT } from '@/lib/constants/game';
+
 export type PixelFontChar = number[][];
 
 // 基础 5x7 字体定义 (A-Z)
@@ -329,8 +331,8 @@ export function renderText(
         const pixelX = currentX + x;
         const pixelY = startY + y;
 
-        // 检查是否在画布范围内 (64x36)
-        if (pixelX >= 0 && pixelX < 64 && pixelY >= 0 && pixelY < 36) {
+        // 检查是否在画布范围内
+        if (pixelX >= 0 && pixelX < GRID_WIDTH && pixelY >= 0 && pixelY < GRID_HEIGHT) {
           const isText = scaledPixels[y][x] === 1;
 
           if (isText) {
@@ -382,8 +384,8 @@ export function isTextInBounds(
   startY: number,
   textWidth: number,
   textHeight: number,
-  canvasWidth: number = 64,
-  canvasHeight: number = 36
+  canvasWidth: number = 100,
+  canvasHeight: number = 56
 ): boolean {
   return (
     startX >= 0 &&

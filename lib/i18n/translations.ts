@@ -190,6 +190,20 @@ export const translations = {
     scaleUp: 'Increase size',
     scaleDown: 'Decrease size',
     buyPixelsWithText: 'Buy Pixels with Text',
+
+    // Dashboard Alerts
+    alertDevnet: 'Testing on Devnet',
+    alertDevnetDesc: 'This is a test network. Tokens have no real value.',
+    alertNoSol: 'SOL Required',
+    alertNoSolDesc: 'You need SOL to pay for transaction fees. Click below to get free test SOL.',
+    alertNoUsdc: 'USDC Required',
+    alertNoUsdcDesc: 'You need USDC to conquer pixels. Click below to get free test USDC.',
+    alertLowBalance: 'Low Balance',
+    alertLowBalanceDesc: 'Your balance is running low. Consider claiming more tokens.',
+    getSol: 'Get SOL',
+    getUsdc: 'Get USDC',
+    phantomTip: 'Phantom Tip',
+    phantomTipDesc: 'Settings → Developer Settings → Enable Testnet Mode → Select Devnet',
   },
 
   zh: {
@@ -382,6 +396,20 @@ export const translations = {
     scaleUp: '放大',
     scaleDown: '缩小',
     buyPixelsWithText: '文字购买像素',
+
+    // Dashboard Alerts
+    alertDevnet: '测试网运行中',
+    alertDevnetDesc: '这是一个测试网络，代币没有实际价值。',
+    alertNoSol: '需要 SOL',
+    alertNoSolDesc: '您需要 SOL 来支付交易手续费。点击下方按钮获取免费测试 SOL。',
+    alertNoUsdc: '需要 USDC',
+    alertNoUsdcDesc: '您需要 USDC 来占领像素。点击下方按钮获取免费测试 USDC。',
+    alertLowBalance: '余额不足',
+    alertLowBalanceDesc: '您的余额不足，请领取更多代币。',
+    getSol: '获取 SOL',
+    getUsdc: '获取 USDC',
+    phantomTip: 'Phantom 提示',
+    phantomTipDesc: '设置 → 开发者设置 → 开启测试网模式 → 选择 Devnet',
   },
 } as const;
 

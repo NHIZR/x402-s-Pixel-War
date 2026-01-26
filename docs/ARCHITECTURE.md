@@ -33,11 +33,12 @@ x402's Pixel War 是一个 **实时多人像素征服游戏**，结合了：
 
 ### 核心特性
 
-1. **50×30 像素网格** - 1,500 个可占领像素
+1. **100×56 像素网格** - 5,600 个可占领像素
 2. **动态定价机制** - 价格随占领次数递增 20%
 3. **实时同步** - 毫秒级全球状态同步
 4. **批量操作** - 支持一次性占领多个像素
 5. **钱包集成** - 无缝 Solana 钱包连接
+6. **文字工具** - 将文字渲染为像素艺术
 
 ### 设计目标
 
@@ -60,7 +61,7 @@ x402's Pixel War 是一个 **实时多人像素征服游戏**，结合了：
 | **TypeScript** | 5.x | 类型安全 |
 | **Tailwind CSS** | 3.x | 样式框架 |
 | **shadcn/ui** | Latest | UI 组件 |
-| **Zustand** | 4.x | 状态管理 |
+| **Zustand** | 5.x | 状态管理 |
 | **Solana Wallet Adapter** | Latest | 钱包连接 |
 
 ### 后端技术
@@ -77,7 +78,8 @@ x402's Pixel War 是一个 **实时多人像素征服游戏**，结合了：
 | 技术 | 用途 |
 |------|------|
 | **Solana** | L1 区块链 |
-| **x402** | 支付协议（Mock） |
+| **x402** | 支付协议 |
+| **SPL Token** | USDC 代币转账 |
 | **USDC** | 稳定币支付 |
 
 ### 开发工具
@@ -196,12 +198,20 @@ app/
 
 components/
 ├── game/                   # 游戏组件
-│   ├── Grid.tsx           # 主网格（1500 个像素）
+│   ├── Grid.tsx           # 主网格（5600 个像素）
 │   ├── Pixel.tsx          # 单个像素组件
 │   ├── UserInfo.tsx       # 用户信息栏
 │   ├── PixelInfoModal.tsx # 像素详情弹窗
 │   ├── BatchConquerModal.tsx # 批量占领弹窗
-│   └── ColorPicker.tsx    # 颜色选择器
+│   ├── TextToolModal.tsx  # 文字工具弹窗
+│   ├── TransactionPanel.tsx # 交易面板
+│   ├── ColorPicker.tsx    # 颜色选择器
+│   └── text-tool/         # 文字工具子组件
+│       ├── TextInput.tsx
+│       ├── ModeSelector.tsx
+│       ├── ColorSelector.tsx
+│       ├── PreviewCanvas.tsx
+│       └── PriceInfo.tsx
 ├── providers/
 │   └── SolanaWalletProvider.tsx # 钱包 Provider
 ├── ui/                     # 通用 UI 组件
@@ -212,24 +222,28 @@ components/
 └── ErrorBoundary.tsx      # 错误边界
 
 lib/
-├── solana/                 # Solana 集成
-│   ├── balance.ts         # 余额查询
-│   └── mockPayment.ts     # Mock 支付
+├── config/                 # 配置
+│   └── solana.ts          # Solana 网络配置
 ├── supabase/               # Supabase 客户端
 │   ├── client.ts          # 浏览器端
 │   └── server.ts          # 服务端
 ├── stores/                 # 状态管理
 │   ├── gameStore.ts       # 游戏状态
-│   └── userStore.ts       # 用户状态
+│   ├── userStore.ts       # 用户状态
+│   └── transactionStore.ts # 交易状态
 ├── services/               # 业务逻辑
-│   └── pixelConquest.ts   # 占领服务
-├── hooks/                  # 自定义 Hooks
-│   └── usePixelConquest.ts
+│   ├── pixelConquest.ts   # 占领服务
+│   ├── x402Payment.ts     # 真实 SPL Token 支付
+│   └── faucet.ts          # 水龙头服务
+├── fonts/                  # 字体
+│   └── pixelFont.ts       # 像素字体渲染引擎
+├── i18n/                   # 国际化
+│   └── translations.ts    # 中英文翻译
 ├── types/                  # TypeScript 类型
 │   └── game.types.ts
 ├── utils/                  # 工具函数
 │   ├── priceCalculation.ts
-│   └── mockUserSync.ts
+│   └── rateLimit.ts       # 速率限制
 └── constants/              # 常量
     └── game.ts
 ```
@@ -244,11 +258,20 @@ App Layout
         │   ├── WalletButton
         │   └── BalanceDisplay
         │
-        └── Grid
-            ├── Pixel × 1500
-            ├── PixelInfoModal
-            └── BatchConquerModal
-                └── ColorPicker
+        ├── Grid
+        │   ├── Pixel × 5600
+        │   ├── PixelInfoModal
+        │   ├── BatchConquerModal
+        │   │   └── ColorPicker
+        │   └── TextToolModal
+        │       ├── TextInput
+        │       ├── ModeSelector
+        │       ├── ColorSelector
+        │       ├── PreviewCanvas
+        │       └── PriceInfo
+        │
+        └── TransactionPanel
+            └── FaucetButton
 ```
 
 ### 组件设计模式
@@ -256,7 +279,7 @@ App Layout
 #### 1. Grid 组件（主网格）
 
 **职责**:
-- 渲染 50×30 像素网格
+- 渲染 100×56 像素网格
 - 处理实时数据同步
 - 管理像素选择状态
 
@@ -266,6 +289,16 @@ App Layout
 export const Grid = React.memo(() => {
   // 只在数据变化时重新渲染
 });
+
+// 使用 useRef 避免拖拽状态触发重渲染
+const isDraggingRef = useRef(false);
+const dragStartRef = useRef<{x: number, y: number} | null>(null);
+
+// 使用 useMemo 优化选中像素查找（O(1) vs O(n)）
+const selectedPixelSet = useMemo(() =>
+  new Set(selectedPixels.map(p => `${p.x},${p.y}`)),
+  [selectedPixels]
+);
 ```
 
 #### 2. Pixel 组件（单个像素）
@@ -421,12 +454,14 @@ CREATE TABLE pixels (
   owner_id UUID,  -- Legacy field
   conquest_count INTEGER NOT NULL DEFAULT 0,
   last_conquered_at TIMESTAMP WITH TIME ZONE,
+  last_tx_hash TEXT,  -- 最后交易哈希
+  tx_count INTEGER DEFAULT 0,  -- 交易次数
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 
   CONSTRAINT pixels_coordinates_unique UNIQUE (x, y),
-  CONSTRAINT pixels_x_check CHECK (x >= 0 AND x < 50),
-  CONSTRAINT pixels_y_check CHECK (y >= 0 AND y < 30),
+  CONSTRAINT pixels_x_check CHECK (x >= 0 AND x < 100),
+  CONSTRAINT pixels_y_check CHECK (y >= 0 AND y < 56),
   CONSTRAINT pixels_color_check CHECK (color ~ '^#[0-9A-Fa-f]{6}$')
 );
 ```
@@ -452,7 +487,7 @@ ON pixels(last_conquered_at DESC);
 
 #### 约束条件
 
-1. **坐标范围**: 0 ≤ x < 50, 0 ≤ y < 30
+1. **坐标范围**: 0 ≤ x < 100, 0 ≤ y < 56
 2. **颜色格式**: 必须是 HEX 格式 (#RRGGBB)
 3. **价格正数**: 价格必须 > 0
 4. **唯一坐标**: (x, y) 组合唯一
@@ -609,57 +644,64 @@ UI 重新渲染
 
 ## 支付系统
 
-### Mock 支付系统
+### 真实 SPL Token 支付
 
-#### 设计目的
+游戏使用真实的 Solana SPL Token 转账进行支付：
 
-1. 快速开发和测试
-2. 演示游戏流程
-3. 易于切换到真实支付
-
-#### 实现
+#### 支付流程
 
 ```typescript
-// lib/solana/mockPayment.ts
-export async function mockPayment(
-  amount: number,
-  walletAddress: string
-): Promise<string> {
-  // 1. 模拟网络延迟
-  await delay(500 + Math.random() * 1000);
+// lib/services/x402Payment.ts
+export function useX402Payment() {
+  const pay = async (amount: number) => {
+    // 1. 获取/创建 Token 账户
+    const senderTokenAccount = await getAssociatedTokenAddress(
+      usdcMintPublicKey,
+      publicKey
+    );
 
-  // 2. 模拟 5% 失败率
-  if (Math.random() < 0.05) {
-    throw new Error('支付失败');
-  }
+    // 2. 创建转账指令
+    const transferInstruction = createTransferInstruction(
+      senderTokenAccount,
+      treasuryTokenAccount,
+      publicKey,
+      amount * 1_000_000 // 6 decimals
+    );
 
-  // 3. 生成模拟交易哈希
-  const txHash = generateMockTxHash();
+    // 3. 构建交易
+    const transaction = new Transaction().add(transferInstruction);
 
-  return txHash;
+    // 4. 发送并确认
+    const txHash = await sendTransaction(transaction, connection);
+    await connection.confirmTransaction(txHash, 'confirmed');
+
+    return { success: true, txHash };
+  };
 }
 ```
 
-### 真实支付集成（未来）
+### 水龙头系统
 
-#### x402 协议集成
+为了降低测试门槛，提供自动化的测试代币分发：
 
 ```typescript
-// 未来实现
-import { x402 } from '@payai/x402';
+// app/api/faucet/route.ts
+export async function POST(request: NextRequest) {
+  const { walletAddress } = await request.json();
 
-export async function realPayment(
-  amount: number,
-  walletAddress: string
-): Promise<string> {
-  const tx = await x402.createPayment({
-    amount,
-    currency: 'USDC',
-    recipient: PLATFORM_WALLET,
-  });
+  // 速率限制：每 24 小时一次
+  const rateLimitCheck = checkRateLimit(walletAddress, 1, 24 * 60 * 60 * 1000);
+  if (!rateLimitCheck.allowed) {
+    return NextResponse.json(
+      { error: '每 24 小时只能领取一次' },
+      { status: 429 }
+    );
+  }
 
-  const signature = await wallet.signTransaction(tx);
-  return signature;
+  // 自动创建 Token 账户（如果不存在）
+  // 分发 100 USDC 测试代币
+  const result = await distributeFaucetTokens(walletAddress);
+  return NextResponse.json(result);
 }
 ```
 
@@ -671,7 +713,7 @@ export async function realPayment(
 
 #### 1. React 渲染优化
 
-**问题**: 1,500 个像素组件频繁重渲染
+**问题**: 5,600 个像素组件频繁重渲染
 
 **解决方案**:
 ```typescript
@@ -905,13 +947,13 @@ const message = {
 3. **演示友好**: Demo 时无需真实钱包
 4. **易于切换**: 抽象层设计，未来可替换
 
-### 为什么 50×30 而不是更大？
+### 为什么 100×56？
 
 **考虑因素**:
-1. **渲染性能**: 1,500 个组件，React 可承受
-2. **用户体验**: 屏幕能完整显示，无需滚动
-3. **初始成本**: 占领所有像素成本约 $15（可接受）
-4. **扩展性**: 可以未来扩展到更大网格
+1. **渲染性能**: 5,600 个组件，通过性能优化（useRef、useMemo）确保流畅
+2. **用户体验**: 适合宽屏显示，提供更大的创作空间
+3. **初始成本**: 占领所有像素成本约 $56（可接受）
+4. **扩展性**: 预留了进一步扩展的空间
 
 ---
 
@@ -983,6 +1025,6 @@ const message = {
 
 ---
 
-**最后更新**: 2026-01-23
-**版本**: v1.0
+**最后更新**: 2026-01-26
+**版本**: v1.1
 **作者**: Built with Claude Code

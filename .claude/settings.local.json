@@ -60,7 +60,10 @@
       "Bash(find:*)",
       "Bash(cd:*)",
       "Bash(gtimeout:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(kill:*)",
+      "Bash(pgrep:*)"
     ]
   }
 }

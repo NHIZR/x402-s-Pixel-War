@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Check, Clock } from 'lucide-react';
+import { Check, Clock, Palette, Pipette } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ColorPickerProps {
   color: string;
@@ -26,7 +27,6 @@ const PRESET_COLORS = [
 const RECENT_COLORS_KEY = 'pixelwar_recent_colors';
 const MAX_RECENT_COLORS = 6;
 
-// 从 localStorage 获取最近使用的颜色
 function getRecentColors(): string[] {
   if (typeof window === 'undefined') return [];
   try {
@@ -37,14 +37,11 @@ function getRecentColors(): string[] {
   }
 }
 
-// 保存最近使用的颜色
 function saveRecentColor(color: string) {
   if (typeof window === 'undefined') return;
   try {
     const recent = getRecentColors();
-    // 移除重复的颜色
     const filtered = recent.filter(c => c.toUpperCase() !== color.toUpperCase());
-    // 添加到开头
     const updated = [color.toUpperCase(), ...filtered].slice(0, MAX_RECENT_COLORS);
     localStorage.setItem(RECENT_COLORS_KEY, JSON.stringify(updated));
   } catch (error) {
@@ -52,112 +49,144 @@ function saveRecentColor(color: string) {
   }
 }
 
+// 判断颜色是否需要深色图标
+function needsDarkIcon(hexColor: string): boolean {
+  const hex = hexColor.replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.6;
+}
+
+// 颜色按钮组件（紧凑版）
+interface ColorButtonProps {
+  buttonColor: string;
+  isSelected: boolean;
+  onClick: () => void;
+  title: string;
+  size?: 'sm' | 'md';
+}
+
+function ColorButton({ buttonColor, isSelected, onClick, title, size = 'sm' }: ColorButtonProps) {
+  const iconColor = needsDarkIcon(buttonColor) ? '#000000' : '#FFFFFF';
+  const sizeClass = size === 'sm' ? 'w-6 h-6' : 'w-8 h-8';
+  const iconSize = size === 'sm' ? 'w-3 h-3' : 'w-4 h-4';
+
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'relative rounded border transition-all duration-150',
+        'hover:scale-110 hover:shadow-md hover:z-10',
+        'focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
+        sizeClass,
+        isSelected ? 'border-cyan-400 shadow-cyan-400/30 shadow-sm' : 'border-gray-600 hover:border-gray-400'
+      )}
+      style={{ backgroundColor: buttonColor }}
+      title={title}
+      aria-label={title}
+      aria-pressed={isSelected}
+    >
+      {isSelected && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Check
+            className={cn(iconSize, 'drop-shadow-md')}
+            style={{ color: iconColor }}
+          />
+        </div>
+      )}
+    </button>
+  );
+}
+
 export function ColorPicker({ color, onChange }: ColorPickerProps) {
   const [customColor, setCustomColor] = useState(color);
   const [recentColors, setRecentColors] = useState<string[]>([]);
 
-  // 加载最近使用的颜色
   useEffect(() => {
     setRecentColors(getRecentColors());
   }, []);
 
-  // 处理颜色变化，保存到最近使用
   const handleColorChange = (newColor: string) => {
     onChange(newColor);
     saveRecentColor(newColor);
-    setRecentColors(getRecentColors()); // 更新显示
+    setRecentColors(getRecentColors());
   };
 
   const handleCustomColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setCustomColor(val);
-
-    // 只有完整的6位hex颜色才更新
     if (/^#[0-9A-F]{6}$/i.test(val)) {
       handleColorChange(val);
     }
   };
 
   return (
-    <div className="space-y-4">
-      {/* 最近使用的颜色 */}
-      {recentColors.length > 0 && (
-        <div>
-          <div className="flex items-center gap-2 mb-3">
-            <Clock className="w-4 h-4 text-cyan-400" />
-            <p className="text-sm font-medium text-gray-300">最近使用</p>
+    <div className="flex items-start gap-4">
+      {/* 左侧：最近使用 + 常用颜色 */}
+      <div className="flex-1 flex gap-4">
+        {/* 最近使用的颜色 */}
+        {recentColors.length > 0 && (
+          <div className="flex-shrink-0">
+            <div className="flex items-center gap-1.5 mb-2">
+              <Clock className="w-3 h-3 text-purple-400" />
+              <span className="text-xs text-gray-400">最近使用</span>
+            </div>
+            <div className="flex gap-1.5 flex-wrap" style={{ maxWidth: '168px' }}>
+              {recentColors.map((recentColor, index) => (
+                <ColorButton
+                  key={`${recentColor}-${index}`}
+                  buttonColor={recentColor}
+                  isSelected={color === recentColor}
+                  onClick={() => {
+                    handleColorChange(recentColor);
+                    setCustomColor(recentColor);
+                  }}
+                  title={`最近使用 ${recentColor}`}
+                />
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-6 gap-2">
-            {recentColors.map((recentColor, index) => (
-              <button
-                key={`${recentColor}-${index}`}
+        )}
+
+        {/* 常用颜色网格 */}
+        <div className="flex-1">
+          <div className="flex items-center gap-1.5 mb-2">
+            <Palette className="w-3 h-3 text-cyan-400" />
+            <span className="text-xs text-gray-400">常用颜色</span>
+          </div>
+          <div className="flex gap-1.5 flex-wrap">
+            {PRESET_COLORS.map((preset) => (
+              <ColorButton
+                key={preset.color}
+                buttonColor={preset.color}
+                isSelected={color === preset.color}
                 onClick={() => {
-                  handleColorChange(recentColor);
-                  setCustomColor(recentColor);
+                  handleColorChange(preset.color);
+                  setCustomColor(preset.color);
                 }}
-                className="relative w-full aspect-square rounded border-2 transition-all hover:scale-110"
-                style={{
-                  backgroundColor: recentColor,
-                  borderColor: color === recentColor ? '#00FFFF' : '#4B5563',
-                }}
-                title={`最近使用 ${recentColor}`}
-              >
-                {color === recentColor && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Check
-                      className="w-5 h-5 drop-shadow-lg"
-                      style={{
-                        color: recentColor === '#FFFFFF' || recentColor === '#FFDD00' ? '#000000' : '#FFFFFF'
-                      }}
-                    />
-                  </div>
-                )}
-              </button>
+                title={preset.name}
+              />
             ))}
           </div>
         </div>
-      )}
-
-      {/* 预设颜色网格 */}
-      <div>
-        <p className="text-sm font-medium mb-3 text-gray-300">常用颜色</p>
-        <div className="grid grid-cols-6 gap-2">
-          {PRESET_COLORS.map((preset) => (
-            <button
-              key={preset.color}
-              onClick={() => {
-                handleColorChange(preset.color);
-                setCustomColor(preset.color);
-              }}
-              className="relative w-full aspect-square rounded border-2 transition-all hover:scale-110"
-              style={{
-                backgroundColor: preset.color,
-                borderColor: color === preset.color ? '#00FFFF' : '#4B5563',
-              }}
-              title={preset.name}
-            >
-              {color === preset.color && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Check
-                    className="w-5 h-5 drop-shadow-lg"
-                    style={{
-                      color: preset.color === '#FFFFFF' || preset.color === '#FFDD00' ? '#000000' : '#FFFFFF'
-                    }}
-                  />
-                </div>
-              )}
-            </button>
-          ))}
-        </div>
       </div>
 
-      {/* 自定义颜色输入 */}
-      <div>
-        <p className="text-sm font-medium mb-2 text-gray-300">自定义颜色</p>
-        <div className="flex items-center gap-3">
-          <div className="relative">
+      {/* 右侧：自定义颜色输入 */}
+      <div className="flex-shrink-0">
+        <div className="flex items-center gap-1.5 mb-2">
+          <Pipette className="w-3 h-3 text-green-400" />
+          <span className="text-xs text-gray-400">自定义</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="relative group">
             <div
-              className="w-12 h-12 rounded border-2 border-gray-600 shadow-lg flex-shrink-0 cursor-pointer hover:border-cyan-400 transition-colors"
+              className={cn(
+                'w-8 h-8 rounded border-2 cursor-pointer transition-all',
+                'group-hover:border-cyan-400',
+                'border-gray-600'
+              )}
               style={{ backgroundColor: color }}
             />
             <input
@@ -170,6 +199,7 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
               }}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               title="点击选择颜色"
+              aria-label="打开调色盘"
             />
           </div>
           <input
@@ -177,19 +207,20 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
             value={customColor}
             onChange={handleCustomColorChange}
             onBlur={() => {
-              // 失焦时如果格式不对，恢复当前有效颜色
               if (!/^#[0-9A-F]{6}$/i.test(customColor)) {
                 setCustomColor(color);
               }
             }}
-            className="flex-1 px-3 py-2 bg-gray-900 border border-gray-600 rounded text-white font-mono text-sm focus:outline-none focus:border-cyan-400 transition-colors"
+            className={cn(
+              'w-20 px-2 py-1.5 bg-gray-900 border rounded text-white font-mono text-xs',
+              'focus:outline-none focus:border-cyan-400',
+              'border-gray-600'
+            )}
             placeholder="#FF0000"
             maxLength={7}
+            aria-label="十六进制颜色代码"
           />
         </div>
-        <p className="text-xs text-gray-400 mt-2">
-          点击颜色框打开调色盘，或输入十六进制颜色代码
-        </p>
       </div>
     </div>
   );
