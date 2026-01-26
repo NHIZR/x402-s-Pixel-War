@@ -24,9 +24,16 @@
         "introduction",
         "roadmap"
       ]
+    },
+    {
+      "group": "Community",
+      "pages": [
+        "contact"
+      ]
     }
   ],
   "footerSocials": {
+    "x": "https://x.com/justapein",
     "github": "https://github.com/NHIZR/x402-s-Pixel-War"
   }
 }
