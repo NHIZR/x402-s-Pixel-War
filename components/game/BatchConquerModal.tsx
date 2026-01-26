@@ -21,6 +21,8 @@ import {
 } from '@/lib/utils/priceCalculation';
 import type { Pixel } from '@/lib/types/game.types';
 import { conquerPixelsBatch, recolorPixelsBatch } from '@/lib/services/pixelConquest';
+import { useTransactionStore } from '@/lib/stores/transactionStore';
+import { useLanguage } from '@/lib/i18n';
 
 interface BatchConquerModalProps {
   open: boolean;
@@ -32,6 +34,8 @@ export function BatchConquerModal({ open, onClose }: BatchConquerModalProps) {
   const { connection } = useConnection();
   const { walletAddress, balance } = useUserStore();
   const { selectedPixels, clearSelection } = useGameStore();
+  const { addTransaction } = useTransactionStore();
+  const { t } = useLanguage();
   const [selectedColor, setSelectedColor] = useState('#FF0000');
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -57,22 +61,22 @@ export function BatchConquerModal({ open, onClose }: BatchConquerModalProps) {
 
   const handleConquer = async () => {
     if (!connected || !walletAddress || !publicKey) {
-      toast.error('请先连接钱包', {
-        description: '需要连接 Solana 钱包才能操作'
+      toast.error(t('connectWalletFirst'), {
+        description: t('needSolanaWalletBatch')
       });
       return;
     }
 
     if (conquerable.length === 0 && ownedPixels.length === 0) {
-      toast.warning('没有像素', {
-        description: '请先选择像素'
+      toast.warning(t('noPixelsSelected'), {
+        description: t('selectPixelsFirst')
       });
       return;
     }
 
     if (conquerable.length > 0 && balance < conquerablePrice) {
-      toast.error('余额不足', {
-        description: `需要 ${formatPrice(conquerablePrice)} USDC，当前余额 ${formatPrice(balance)} USDC`
+      toast.error(t('insufficientBalance'), {
+        description: `${t('youPay')} ${formatPrice(conquerablePrice)} USDC, ${t('currentBalanceColon')} ${formatPrice(balance)} USDC`
       });
       return;
     }
@@ -84,15 +88,15 @@ export function BatchConquerModal({ open, onClose }: BatchConquerModalProps) {
 
     let loadingMessage = '';
     if (hasConquer && hasRecolor) {
-      loadingMessage = `正在处理 ${conquerable.length} 个占领 + ${ownedPixels.length} 个换色...`;
+      loadingMessage = t('processing');
     } else if (hasConquer) {
-      loadingMessage = `正在批量占领 ${conquerable.length} 个像素...`;
+      loadingMessage = t('processing');
     } else {
-      loadingMessage = `正在批量换色 ${ownedPixels.length} 个像素...`;
+      loadingMessage = t('processing');
     }
 
     const loadingToast = toast.loading(loadingMessage, {
-      description: hasConquer ? `总支付: ${formatPrice(conquerablePrice)} USDC` : '免费换色'
+      description: hasConquer ? `${t('totalPaid', { n: formatPrice(conquerablePrice) })}` : t('freeRecolorNote')
     });
 
     try {
@@ -143,6 +147,15 @@ export function BatchConquerModal({ open, onClose }: BatchConquerModalProps) {
           // 扣除余额
           const newBalance = balance - conquerResult.totalPaid;
           useUserStore.getState().setBalance(newBalance);
+
+          // 添加交易记录
+          addTransaction({
+            type: 'batch_conquer',
+            pixelCount: conquerResult.successCount,
+            amount: conquerResult.totalPaid,
+            txHash: conquerResult.txHash || '',
+            status: 'confirmed',
+          });
         }
       }
 
@@ -181,13 +194,13 @@ export function BatchConquerModal({ open, onClose }: BatchConquerModalProps) {
       // 显示结果
       if (totalError === 0) {
         // 全部成功
-        toast.success('🎉 操作成功！', {
+        toast.success(`🎉 ${t('operationSuccess')}`, {
           description: (
             <div className="space-y-1">
-              {totalSuccess > 0 && <div>✅ 占领: {totalSuccess} 个像素</div>}
-              {totalSkipped > 0 && <div>⏭️ 跳过: {totalSkipped} 个 (已拥有)</div>}
-              {hasRecolor && <div>🎨 换色: {ownedPixels.length} 个像素</div>}
-              {totalPaid > 0 && <div>💰 总支付: {formatPrice(totalPaid)} USDC</div>}
+              {totalSuccess > 0 && <div>✅ {t('conqueredCount', { n: totalSuccess })}</div>}
+              {totalSkipped > 0 && <div>⏭️ {t('skippedCount', { n: totalSkipped })}</div>}
+              {hasRecolor && <div>🎨 {t('recoloredCount', { n: ownedPixels.length })}</div>}
+              {totalPaid > 0 && <div>💰 {t('totalPaid', { n: formatPrice(totalPaid) })}</div>}
             </div>
           ),
           duration: 5000
@@ -196,13 +209,13 @@ export function BatchConquerModal({ open, onClose }: BatchConquerModalProps) {
         onClose();
       } else if (totalSuccess > 0 || totalSkipped > 0) {
         // 部分成功
-        toast.warning('⚠️ 部分成功', {
+        toast.warning(`⚠️ ${t('partialSuccess')}`, {
           description: (
             <div className="space-y-1">
-              {totalSuccess > 0 && <div>✅ 成功: {totalSuccess} 个</div>}
-              {totalSkipped > 0 && <div>⏭️ 跳过: {totalSkipped} 个 (已拥有)</div>}
-              {totalError > 0 && <div>❌ 失败: {totalError} 个</div>}
-              {totalPaid > 0 && <div>💰 支付: {formatPrice(totalPaid)} USDC</div>}
+              {totalSuccess > 0 && <div>✅ {t('successCount', { n: totalSuccess })}</div>}
+              {totalSkipped > 0 && <div>⏭️ {t('skippedCount', { n: totalSkipped })}</div>}
+              {totalError > 0 && <div>❌ {t('failedCount', { n: totalError })}</div>}
+              {totalPaid > 0 && <div>💰 {t('totalPaid', { n: formatPrice(totalPaid) })}</div>}
             </div>
           ),
           duration: 6000
@@ -211,16 +224,16 @@ export function BatchConquerModal({ open, onClose }: BatchConquerModalProps) {
         onClose();
       } else {
         // 全部失败
-        toast.error('❌ 操作失败', {
-          description: '所有像素操作都失败了',
+        toast.error(`❌ ${t('operationFailed')}`, {
+          description: t('allPixelsFailed'),
           duration: 5000
         });
       }
     } catch (error) {
       toast.dismiss(loadingToast);
       console.error('批量占领失败:', error);
-      toast.error('批量占领失败', {
-        description: error instanceof Error ? error.message : '未知错误'
+      toast.error(t('batchConquestFailed'), {
+        description: error instanceof Error ? error.message : t('errorOccurred')
       });
     } finally {
       setIsProcessing(false);
@@ -231,9 +244,9 @@ export function BatchConquerModal({ open, onClose }: BatchConquerModalProps) {
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>批量占领像素</DialogTitle>
+          <DialogTitle>{t('batchConquest')}</DialogTitle>
           <DialogDescription>
-            一次性占领 {conquerable.length} 个像素
+            {t('conquerNPixels', { n: conquerable.length })}
           </DialogDescription>
         </DialogHeader>
 
@@ -241,37 +254,37 @@ export function BatchConquerModal({ open, onClose }: BatchConquerModalProps) {
           {/* 统计信息 */}
           <div className="grid grid-cols-3 gap-3 text-sm">
             <div className="bg-gray-900 border border-gray-800 rounded p-3 text-center">
-              <p className="text-cyber-white/50 mb-1">已选择</p>
+              <p className="text-cyber-white/50 mb-1">{t('selected')}</p>
               <p className="text-2xl font-bold text-cyan-400">{stats.total}</p>
             </div>
             <div className="bg-gray-900 border border-gray-800 rounded p-3 text-center">
-              <p className="text-cyber-white/50 mb-1">可占领</p>
+              <p className="text-cyber-white/50 mb-1">{t('canConquer')}</p>
               <p className="text-2xl font-bold text-green-400">{stats.available}</p>
             </div>
             <div className="bg-gray-900 border border-gray-800 rounded p-3 text-center">
-              <p className="text-cyber-white/50 mb-1">已拥有</p>
+              <p className="text-cyber-white/50 mb-1">{t('owned')}</p>
               <p className="text-2xl font-bold text-gray-400">{stats.owned}</p>
             </div>
           </div>
 
           {/* 价格信息 */}
           <div className="bg-gray-900 border border-gray-800 rounded p-4 space-y-3">
-            <p className="font-semibold mb-2">💰 批量占领费用</p>
+            <p className="font-semibold mb-2">💰 {t('batchCost')}</p>
 
             {conquerable.length > 0 && (
               <>
                 <div className="flex justify-between text-sm">
-                  <span className="text-cyber-white/70">占领 {conquerable.length} 个像素：</span>
+                  <span className="text-cyber-white/70">{t('conquerNPixelsColon', { n: conquerable.length })}</span>
                   <span className="font-mono font-bold">{formatPrice(conquerablePrice)} USDC</span>
                 </div>
 
                 <div className="border-t border-gray-700 pt-3 space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-cyber-white/70">当前余额：</span>
+                    <span className="text-cyber-white/70">{t('currentBalanceColon')}</span>
                     <span className="font-mono">{formatPrice(balance)} USDC</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-cyber-white/70">占领后余额：</span>
+                    <span className="text-cyber-white/70">{t('afterConquestBalanceColon')}</span>
                     <span className={`font-mono ${balance >= conquerablePrice ? 'text-green-400' : 'text-red-400'}`}>
                       {formatPrice(Math.max(0, balance - conquerablePrice))} USDC
                     </span>
@@ -281,16 +294,16 @@ export function BatchConquerModal({ open, onClose }: BatchConquerModalProps) {
             )}
 
             {conquerable.length === 0 && (
-              <p className="text-sm text-gray-400">你已拥有所有选中的像素</p>
+              <p className="text-sm text-gray-400">{t('youOwnAllSelected')}</p>
             )}
           </div>
 
           {/* 颜色选择器 */}
           <div>
-            <p className="text-sm font-semibold mb-3">选择统一颜色</p>
+            <p className="text-sm font-semibold mb-3">{t('selectUnifiedColor')}</p>
             <ColorPicker color={selectedColor} onChange={setSelectedColor} />
             <p className="text-xs text-gray-400 mt-2">
-              所有被占领的像素将使用这个颜色
+              {t('allConqueredPixelsUseThisColor')}
             </p>
           </div>
 
@@ -301,7 +314,7 @@ export function BatchConquerModal({ open, onClose }: BatchConquerModalProps) {
               style={{ backgroundColor: selectedColor }}
             />
             <div className="flex-1">
-              <p className="text-sm font-medium">占领后颜色预览</p>
+              <p className="text-sm font-medium">{t('colorPreview')}</p>
               <p className="text-xs text-gray-400 font-mono mt-1">{selectedColor}</p>
             </div>
           </div>
@@ -309,7 +322,7 @@ export function BatchConquerModal({ open, onClose }: BatchConquerModalProps) {
           {/* 警告信息 */}
           {conquerable.length > 0 && balance < conquerablePrice && (
             <div className="bg-red-900/20 border border-red-500/50 rounded p-3 text-sm text-red-400">
-              ⚠️ 余额不足！需要 {formatPrice(conquerablePrice - balance)} USDC 更多代币
+              ⚠️ {t('insufficientNeedMore', { n: formatPrice(conquerablePrice - balance) })}
             </div>
           )}
         </div>
@@ -320,7 +333,7 @@ export function BatchConquerModal({ open, onClose }: BatchConquerModalProps) {
             onClick={onClose}
             disabled={isProcessing}
           >
-            取消
+            {t('cancel')}
           </Button>
           <Button
             onClick={handleConquer}
@@ -328,18 +341,18 @@ export function BatchConquerModal({ open, onClose }: BatchConquerModalProps) {
             className="min-w-[140px]"
           >
             {isProcessing
-              ? '处理中...'
+              ? t('processing')
               : !connected
-              ? '需要登录'
+              ? t('needLogin')
               : conquerable.length > 0 && ownedPixels.length > 0
-              ? `占领 ${conquerable.length} + 换色 ${ownedPixels.length}`
+              ? t('conquerNPlusRecolorM', { n: conquerable.length, m: ownedPixels.length })
               : conquerable.length > 0
               ? balance < conquerablePrice
-                ? '余额不足'
-                : `占领 ${conquerable.length} 个 (${formatPrice(conquerablePrice)} USDC)`
+                ? t('insufficientBalance')
+                : t('conquerNFor', { n: conquerable.length, price: formatPrice(conquerablePrice) })
               : ownedPixels.length > 0
-              ? `🎨 换色 ${ownedPixels.length} 个 (免费)`
-              : '没有像素'}
+              ? `🎨 ${t('recolorNFree', { n: ownedPixels.length })}`
+              : t('noPixels')}
           </Button>
         </DialogFooter>
       </DialogContent>

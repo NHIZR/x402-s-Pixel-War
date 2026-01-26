@@ -9,6 +9,7 @@ import { useEffect, useRef } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { toast } from 'sonner';
 import { useTokenBalance } from '@/hooks/useTokenBalance';
+import { useLanguage } from '@/lib/i18n';
 
 const LOW_BALANCE_THRESHOLD = 10; // USDC
 const GUIDANCE_SHOWN_KEY = 'faucet-guidance-shown';
@@ -16,6 +17,7 @@ const GUIDANCE_SHOWN_KEY = 'faucet-guidance-shown';
 export function WalletConnectionGuide() {
   const { connected } = useWallet();
   const { balance, loading } = useTokenBalance();
+  const { t } = useLanguage();
   const hasShownGuideRef = useRef(false);
   const previousConnectedRef = useRef(false);
 
@@ -54,20 +56,19 @@ export function WalletConnectionGuide() {
 
     // Show guidance if balance is low
     if (balance < LOW_BALANCE_THRESHOLD) {
-      toast.info('需要测试 USDC？', {
+      toast.info(t('needTestUSDC'), {
         description: (
           <div>
-            <p>您的余额较低 ({balance.toFixed(2)} USDC)。</p>
+            <p>{t('balanceLow', { n: balance.toFixed(2) })}</p>
             <p className="mt-1">
-              点击右上角的{' '}
+              {t('clickFaucetButton')}{' '}
               <span className="inline-flex items-center px-2 py-0.5 bg-cyan-600 text-white rounded text-xs font-medium">
-                💧 领取 USDC
+                💧 {t('faucetButtonLabel')}
               </span>{' '}
-              按钮获取免费测试代币！
+              {t('toGetFreeTokens')}
             </p>
             <p className="mt-2 text-xs text-gray-400">
-              💡 提示：如果钱包显示 "insufficient SOL" 警告，可以安全地点击 "Confirm anyway"。
-              Faucet 会支付账户创建费用，您只需少量 SOL 支付交易费。
+              💡 {t('solWarningTip')}
             </p>
           </div>
         ),
@@ -85,7 +86,7 @@ export function WalletConnectionGuide() {
         console.warn('Failed to save guidance state:', error);
       }
     }
-  }, [connected, balance, loading]);
+  }, [connected, balance, loading, t]);
 
   // This component doesn't render anything
   return null;

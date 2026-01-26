@@ -10,11 +10,13 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { toast } from 'sonner';
 import { useTokenBalance } from '@/hooks/useTokenBalance';
 import { getSolanaExplorerUrl } from '@/lib/config/solana';
+import { useTransactionStore } from '@/lib/stores/transactionStore';
 import { Button } from './ui/button';
 
 export function FaucetButton() {
   const { publicKey, connected } = useWallet();
   const { balance, loading: balanceLoading, refetch } = useTokenBalance();
+  const { addTransaction } = useTransactionStore();
   const [claiming, setClaiming] = useState(false);
 
   // Only show when wallet is connected
@@ -56,6 +58,14 @@ export function FaucetButton() {
 
       // Success - show transaction link
       const explorerUrl = getSolanaExplorerUrl('tx', data.txHash);
+
+      // 添加交易记录
+      addTransaction({
+        type: 'faucet',
+        amount: data.amount || 100,
+        txHash: data.txHash,
+        status: 'confirmed',
+      });
 
       toast.success('领取成功！', {
         description: (

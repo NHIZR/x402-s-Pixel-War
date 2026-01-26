@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/schema.json",
-  "name": "x402's Pixel War",
+  "name": "Pixel War",
   "logo": {
     "dark": "/logo/dark.svg",
     "light": "/logo/light.svg"
@@ -14,19 +14,19 @@
   "topbarLinks": [
     {
       "name": "Play Game",
-      "url": "https://x402-pixel-war.vercel.app"
+      "url": "https://pixel-war.vercel.app"
     }
   ],
   "navigation": [
     {
       "group": "Overview",
       "pages": [
-        "introduction"
+        "introduction",
+        "roadmap"
       ]
     }
   ],
   "footerSocials": {
-    "github": "https://github.com/yourusername/x402-pixel-war",
-    "twitter": "https://twitter.com/x402PixelWar"
+    "github": "https://github.com/NHIZR/x402-s-Pixel-War"
   }
 }

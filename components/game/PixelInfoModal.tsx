@@ -22,12 +22,16 @@ import {
   calculateWarTax,
 } from '@/lib/utils/priceCalculation';
 import { conquerPixel, recolorPixel } from '@/lib/services/pixelConquest';
+import { useTransactionStore } from '@/lib/stores/transactionStore';
+import { useLanguage } from '@/lib/i18n';
 
 export function PixelInfoModal() {
   const { connected, publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
   const { walletAddress, balance } = useUserStore();
   const { selectedPixel, selectPixel } = useGameStore();
+  const { addTransaction } = useTransactionStore();
+  const { t } = useLanguage();
   const [selectedColor, setSelectedColor] = useState('#FF0000');
   const [isConquering, setIsConquering] = useState(false);
 
@@ -40,8 +44,8 @@ export function PixelInfoModal() {
 
   const handleConquer = async () => {
     if (!connected || !walletAddress || !publicKey) {
-      toast.error('请先连接钱包', {
-        description: '需要连接 Solana 钱包才能占领像素'
+      toast.error(t('connectWalletFirst'), {
+        description: t('needSolanaWallet')
       });
       return;
     }
@@ -52,8 +56,8 @@ export function PixelInfoModal() {
     if (isOwner) {
       setIsConquering(true);
 
-      const loadingToast = toast.loading('正在更换颜色...', {
-        description: `坐标 (${selectedPixel.x}, ${selectedPixel.y})`
+      const loadingToast = toast.loading(t('recoloring'), {
+        description: `${t('coordinates')} (${selectedPixel.x}, ${selectedPixel.y})`
       });
 
       try {
@@ -78,27 +82,27 @@ export function PixelInfoModal() {
             );
           }
 
-          toast.success('🎨 换色成功！', {
+          toast.success(`🎨 ${t('recolorSuccess')}`, {
             description: (
               <div className="space-y-1">
-                <div>坐标: ({selectedPixel.x}, {selectedPixel.y})</div>
-                <div>新颜色: {selectedColor}</div>
-                <div className="text-xs opacity-70">免费换色</div>
+                <div>{t('coordinates')} ({selectedPixel.x}, {selectedPixel.y})</div>
+                <div>{t('newColorColon')} {selectedColor}</div>
+                <div className="text-xs opacity-70">{t('freeRecolorNote')}</div>
               </div>
             ),
             duration: 3000
           });
           selectPixel(null);
         } else {
-          toast.error('换色失败', {
+          toast.error(t('recolorFailed'), {
             description: result.error
           });
         }
       } catch (error) {
         toast.dismiss(loadingToast);
         console.error('Recolor error:', error);
-        toast.error('发生错误', {
-          description: error instanceof Error ? error.message : '未知错误'
+        toast.error(t('errorOccurred'), {
+          description: error instanceof Error ? error.message : t('errorOccurred')
         });
       } finally {
         setIsConquering(false);
@@ -108,16 +112,16 @@ export function PixelInfoModal() {
 
     // Normal conquest flow (not owner)
     if (balance < selectedPixel.currentPrice) {
-      toast.error('余额不足', {
-        description: `需要 ${formatPrice(selectedPixel.currentPrice)} USDC，当前余额 ${formatPrice(balance)} USDC`
+      toast.error(t('insufficientBalance'), {
+        description: `${t('youPay')} ${formatPrice(selectedPixel.currentPrice)} USDC, ${t('currentBalanceColon')} ${formatPrice(balance)} USDC`
       });
       return;
     }
 
     setIsConquering(true);
 
-    const loadingToast = toast.loading('正在占领像素...', {
-      description: `坐标 (${selectedPixel.x}, ${selectedPixel.y})`
+    const loadingToast = toast.loading(t('conquering'), {
+      description: `${t('coordinates')} (${selectedPixel.x}, ${selectedPixel.y})`
     });
 
     try {
@@ -158,12 +162,22 @@ export function PixelInfoModal() {
           新余额: newBalance
         });
 
-        toast.success('🎉 占领成功！', {
+        // 添加交易记录
+        addTransaction({
+          type: 'conquer',
+          pixelX: selectedPixel.x,
+          pixelY: selectedPixel.y,
+          amount: selectedPixel.currentPrice,
+          txHash: result.txHash || '',
+          status: 'confirmed',
+        });
+
+        toast.success(`🎉 ${t('conquestSuccess')}`, {
           description: (
             <div className="space-y-1">
-              <div>坐标: ({selectedPixel.x}, {selectedPixel.y})</div>
-              <div>支付: {formatPrice(selectedPixel.currentPrice)} USDC</div>
-              <div>新价格: {formatPrice(result.pixel?.newPrice || 0)} USDC</div>
+              <div>{t('coordinates')} ({selectedPixel.x}, {selectedPixel.y})</div>
+              <div>{t('paid')} {formatPrice(selectedPixel.currentPrice)} USDC</div>
+              <div>{t('newPrice')} {formatPrice(result.pixel?.newPrice || 0)} USDC</div>
               <div className="text-xs opacity-70">TX: {result.txHash?.substring(0, 12)}...</div>
             </div>
           ),
@@ -171,15 +185,15 @@ export function PixelInfoModal() {
         });
         selectPixel(null); // Close modal
       } else {
-        toast.error('占领失败', {
+        toast.error(t('conquestFailed'), {
           description: result.error
         });
       }
     } catch (error) {
       toast.dismiss(loadingToast);
       console.error('Conquest error:', error);
-      toast.error('发生错误', {
-        description: error instanceof Error ? error.message : '未知错误'
+      toast.error(t('errorOccurred'), {
+        description: error instanceof Error ? error.message : t('errorOccurred')
       });
     } finally {
       setIsConquering(false);
@@ -194,10 +208,10 @@ export function PixelInfoModal() {
       <DialogContent onClose={() => selectPixel(null)}>
         <DialogHeader>
           <DialogTitle>
-            像素 ({selectedPixel.x}, {selectedPixel.y})
+            {t('pixel')} ({selectedPixel.x}, {selectedPixel.y})
           </DialogTitle>
           <DialogDescription>
-            {selectedPixel.ownerId ? '已被占领' : '未被占领'}
+            {selectedPixel.ownerId ? t('conquered') : t('notConquered')}
           </DialogDescription>
         </DialogHeader>
 
@@ -205,41 +219,41 @@ export function PixelInfoModal() {
           {/* 当前状态 */}
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div>
-              <p className="text-cyber-white/50 mb-1">当前价格</p>
+              <p className="text-cyber-white/50 mb-1">{t('currentPrice')}</p>
               <p className="text-lg font-bold">{formatPrice(selectedPixel.currentPrice)} USDC</p>
             </div>
             <div>
-              <p className="text-cyber-white/50 mb-1">占领次数</p>
-              <p className="text-lg font-bold">{selectedPixel.conquestCount} 次</p>
+              <p className="text-cyber-white/50 mb-1">{t('conquestCount')}</p>
+              <p className="text-lg font-bold">{selectedPixel.conquestCount} {t('times')}</p>
             </div>
           </div>
 
           {/* 价格预测 */}
           <div className="bg-gray-900 border border-gray-800 rounded p-3 space-y-2 text-sm">
-            <p className="font-semibold mb-2">💰 占领后的交易详情</p>
+            <p className="font-semibold mb-2">💰 {t('transactionDetails')}</p>
             <div className="flex justify-between">
-              <span className="text-cyber-white/70">你支付：</span>
+              <span className="text-cyber-white/70">{t('youPay')}</span>
               <span className="font-mono">{formatPrice(selectedPixel.currentPrice)} USDC</span>
             </div>
             {selectedPixel.ownerId && (
               <div className="flex justify-between">
-                <span className="text-cyber-white/70">前任获得：</span>
+                <span className="text-cyber-white/70">{t('previousOwnerGets')}</span>
                 <span className="font-mono text-green-400">+{formatPrice(sellerProfit)} USDC</span>
               </div>
             )}
             <div className="flex justify-between">
-              <span className="text-cyber-white/70">战争税：</span>
+              <span className="text-cyber-white/70">{t('warTax')}</span>
               <span className="font-mono text-red-400">-{formatPrice(warTax)} USDC</span>
             </div>
             <div className="border-t border-gray-700 pt-2 mt-2 flex justify-between">
-              <span className="text-cyber-white/70">新价格：</span>
+              <span className="text-cyber-white/70">{t('newPrice')}</span>
               <span className="font-mono font-bold">{formatPrice(newPrice)} USDC</span>
             </div>
           </div>
 
           {/* 颜色选择器 */}
           <div>
-            <p className="text-sm font-semibold mb-3">选择你的颜色</p>
+            <p className="text-sm font-semibold mb-3">{t('selectColor')}</p>
             <ColorPicker color={selectedColor} onChange={setSelectedColor} />
           </div>
 
@@ -250,7 +264,7 @@ export function PixelInfoModal() {
               style={{ backgroundColor: selectedPixel.color }}
             />
             <div className="text-xs text-cyber-white/50">
-              <p>当前颜色</p>
+              <p>{t('currentColor')}</p>
               <p className="font-mono mt-1">{selectedPixel.color}</p>
             </div>
 
@@ -261,7 +275,7 @@ export function PixelInfoModal() {
               style={{ backgroundColor: selectedColor }}
             />
             <div className="text-xs text-cyber-white/50">
-              <p>占领后颜色</p>
+              <p>{t('afterConquestColor')}</p>
               <p className="font-mono mt-1">{selectedColor}</p>
             </div>
           </div>
@@ -272,7 +286,7 @@ export function PixelInfoModal() {
             variant="outline"
             onClick={() => selectPixel(null)}
           >
-            取消
+            {t('cancel')}
           </Button>
           <Button
             onClick={handleConquer}
@@ -280,14 +294,14 @@ export function PixelInfoModal() {
             className="min-w-[120px]"
           >
             {isConquering
-              ? (isOwner ? '换色中...' : '占领中...')
+              ? (isOwner ? t('recoloring') : t('conquering'))
               : !connected
-              ? '需要登录'
+              ? t('needLogin')
               : isOwner
-              ? '🎨 免费换色'
+              ? `🎨 ${t('freeRecolor')}`
               : balance < selectedPixel.currentPrice
-              ? '余额不足'
-              : `占领 (${formatPrice(selectedPixel.currentPrice)} USDC)`}
+              ? t('insufficientBalance')
+              : `${t('conquer')} (${formatPrice(selectedPixel.currentPrice)} USDC)`}
           </Button>
         </DialogFooter>
       </DialogContent>

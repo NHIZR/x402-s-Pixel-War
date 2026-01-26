@@ -1,12 +1,14 @@
 {
-  "name": "x402-pixel-war",
+  "name": "pixel-war",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "vercel-build": "npm run build"
   },
   "dependencies": {
     "@payai/x402-solana-react": "^2.0.0",

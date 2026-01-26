@@ -6,13 +6,17 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { Eye, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
 import { useUserStore } from '@/lib/stores/userStore';
+import { useTransactionStore } from '@/lib/stores/transactionStore';
 import { getUSDCBalance, getSOLBalance } from '@/lib/solana/balance';
 import { getSolanaExplorerUrl } from '@/lib/config/solana';
+import { useLanguage } from '@/lib/i18n';
 
 export function UserInfo() {
   const { publicKey, connected, disconnect } = useWallet();
   const { connection } = useConnection();
   const { walletAddress, balance, setWalletAddress, setBalance, disconnect: disconnectStore } = useUserStore();
+  const { addTransaction } = useTransactionStore();
+  const { t } = useLanguage();
   const [claiming, setClaiming] = useState(false);
 
   // 同步钱包状态
@@ -78,12 +82,12 @@ export function UserInfo() {
       if (!response.ok) {
         // Handle different error cases
         if (response.status === 429) {
-          toast.error('领取失败', {
-            description: data.error || '请稍后再试',
+          toast.error(t('claimFailed'), {
+            description: data.error || t('tryAgainLater'),
           });
         } else {
-          toast.error('领取失败', {
-            description: data.error || '未知错误',
+          toast.error(t('claimFailed'), {
+            description: data.error || t('errorOccurred'),
           });
         }
         return;
@@ -92,17 +96,25 @@ export function UserInfo() {
       // Success - show transaction link
       const explorerUrl = getSolanaExplorerUrl('tx', data.txHash);
 
-      toast.success('领取成功！', {
+      // 添加交易记录
+      addTransaction({
+        type: 'faucet',
+        amount: data.amount || 100,
+        txHash: data.txHash,
+        status: 'confirmed',
+      });
+
+      toast.success(t('claimSuccess'), {
         description: (
           <div>
-            <p>已发送 {data.amount} USDC 到您的钱包</p>
+            <p>{t('sentToWallet', { n: data.amount })}</p>
             <a
               href={explorerUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="text-cyan-400 hover:text-cyan-300 underline text-sm mt-1 inline-block"
             >
-              在 Solana Explorer 查看交易 →
+              {t('viewOnExplorer')}
             </a>
           </div>
         ),
@@ -118,8 +130,8 @@ export function UserInfo() {
       }, 2000);
     } catch (error) {
       console.error('Faucet claim error:', error);
-      toast.error('请求失败', {
-        description: '网络错误，请稍后重试',
+      toast.error(t('requestFailed'), {
+        description: t('networkError'),
       });
     } finally {
       setClaiming(false);
@@ -134,8 +146,8 @@ export function UserInfo() {
     const faucetUrl = `https://faucet.solana.com/?address=${publicKey.toBase58()}`;
     window.open(faucetUrl, '_blank');
 
-    toast.info('正在打开 Solana Faucet', {
-      description: '请在新窗口中完成 SOL 领取',
+    toast.info(t('openingSolanaFaucet'), {
+      description: t('completeSolClaimInNewWindow'),
       duration: 5000,
     });
   };
@@ -148,8 +160,8 @@ export function UserInfo() {
         <div className="flex items-center gap-2">
           <Eye className="w-4 h-4 text-cyan-400/70" />
           <div className="text-sm">
-            <div className="font-semibold text-cyan-400">游客模式</div>
-            <div className="text-xs text-gray-400">只可浏览</div>
+            <div className="font-semibold text-cyan-400">{t('guestMode')}</div>
+            <div className="text-xs text-gray-400">{t('viewOnly')}</div>
           </div>
         </div>
 
@@ -169,13 +181,13 @@ export function UserInfo() {
         <Wallet className="w-4 h-4 text-cyan-400" />
         <div className="text-sm">
           <div className="font-semibold text-cyan-400 font-mono">{formatAddress(walletAddress)}</div>
-          <div className="text-xs text-gray-400">Solana 钱包</div>
+          <div className="text-xs text-gray-400">{t('solanaWallet')}</div>
         </div>
       </div>
 
       {/* USDC 余额 */}
       <div className="border-l border-gray-700 pl-3">
-        <div className="text-xs text-gray-500">USDC 余额</div>
+        <div className="text-xs text-gray-500">{t('usdcBalance')}</div>
         <div className="text-sm font-mono font-medium text-cyan-400">{balance.toFixed(2)} USDC</div>
       </div>
 
@@ -186,15 +198,15 @@ export function UserInfo() {
           onClick={handleClaimTokens}
           disabled={claiming}
           className="px-3 py-1 text-xs bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded transition-colors"
-          title="领取测试 USDC"
+          title={t('claimUSDC')}
         >
           {claiming ? (
             <>
               <span className="inline-block animate-spin mr-1">⏳</span>
-              领取中...
+              {t('claiming')}
             </>
           ) : (
-            <>💧 领取 USDC</>
+            <>💧 {t('claimUSDC')}</>
           )}
         </button>
 
@@ -202,9 +214,9 @@ export function UserInfo() {
         <button
           onClick={handleClaimSOL}
           className="px-3 py-1 text-xs bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors"
-          title="领取测试 SOL（跳转到官方 Faucet）"
+          title={t('claimSOL')}
         >
-          ⚡ 领取 SOL
+          ⚡ {t('claimSOL')}
         </button>
       </div>
 
@@ -213,7 +225,7 @@ export function UserInfo() {
         onClick={() => disconnect()}
         className="px-3 py-1 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors"
       >
-        断开
+        {t('disconnect')}
       </button>
     </div>
   );

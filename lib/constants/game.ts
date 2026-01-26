@@ -3,12 +3,12 @@
  */
 
 // Grid dimensions
-export const GRID_WIDTH = 50;
-export const GRID_HEIGHT = 30;
+export const GRID_WIDTH = 64;
+export const GRID_HEIGHT = 36;
 export const TOTAL_PIXELS = GRID_WIDTH * GRID_HEIGHT;
 
 // Pricing
-export const INITIAL_PIXEL_PRICE = 0.01; // USDC (支付通过 x402)
+export const INITIAL_PIXEL_PRICE = 0.01; // USDC
 export const PRICE_INCREASE_MULTIPLIER = 1.2; // 20% increase per conquest
 export const SELLER_PROFIT_RATE = 1.1; // Seller gets principal + 10%
 export const WAR_TAX_RATE = 0.1; // 10% war tax to platform

@@ -51,6 +51,7 @@ wallets/
 !package-lock.json
 !tsconfig.json
 !next.json
+!vercel.json
 
 # Solana Test Ledger
 test-ledger/
