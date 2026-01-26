@@ -5,12 +5,13 @@ description: "Future development plans for Pixel War"
 
 ## Current Status
 
-**Version**: 1.0 (Stable)
+**Version**: 1.1 (Stable)
 **Network**: Solana Devnet
 **Payment**: USDC (SPL Token)
+**Canvas**: 100×56 pixels (5,600 total)
 
 <Note>
-The main branch is production-ready with direct SPL Token payment integration.
+The main branch is production-ready with direct SPL Token payment integration and the new Text Tool feature.
 </Note>
 
 ---
@@ -19,7 +20,7 @@ The main branch is production-ready with direct SPL Token payment integration.
 
 <Steps>
   <Step title="Pixel Canvas">
-    64x36 grid with real-time synchronization via Supabase Realtime
+    100×56 grid with real-time synchronization via Supabase Realtime
   </Step>
   <Step title="Wallet Integration">
     Phantom, Solflare, and other Solana wallets supported
@@ -34,25 +35,34 @@ The main branch is production-ready with direct SPL Token payment integration.
 
 ---
 
-## Phase 2: Enhanced Experience (In Progress)
+## Phase 2: Enhanced Experience (Completed)
 
 ### UI/UX Improvements
 
 <CardGroup cols={2}>
-  <Card title="Transaction Panel" icon="list">
-    Real-time transaction log with wallet balance display
+  <Card title="Text Tool" icon="font">
+    Draw text as pixel art with full canvas preview and drag-and-drop positioning
   </Card>
   <Card title="Internationalization" icon="globe">
-    Full Chinese and English language support
+    Full Chinese and English language support with persistent preference
   </Card>
 </CardGroup>
 
-**Features**:
-- Right-side information panel (320px)
+**Text Tool Features**:
+- Full canvas preview (100×56) using HTML Canvas rendering
+- Drag-and-drop text positioning
+- Font size scaling (+/- controls)
+- Compact color picker (recent + preset + custom HEX)
+- Input mode: Continuous text / Single letter
+- Purchase mode: Text only / Full cover
+- Smart boundary detection
+- USDC blue border indicator
+
+**UI Enhancements**:
+- Transaction panel with real-time logs
 - SOL and USDC balance display
-- Transaction history with scrolling effect
-- Tech-style visual design
-- Language toggle (EN/CN)
+- Compact inline mode selectors
+- Responsive dialog layouts
 
 ---
 
@@ -112,12 +122,14 @@ The ultimate goal is to enable **AI Agents** to participate in the pixel economy
 
 | Milestone | Status | Target |
 | :--- | :--- | :--- |
-| Core Game | Completed | - |
+| Core Game (64×36) | Completed | - |
+| Canvas Expansion (100×56) | Completed | - |
 | Direct SPL Payment | Completed | - |
-| UI Enhancements | In Progress | Q1 2026 |
+| Text Tool | Completed | - |
+| UI Enhancements | Completed | - |
 | X402 Backend API | Completed | - |
 | X402 Frontend Integration | Planned | Q2 2026 |
-| Canvas Expansion (1000×1000) | Planned | Q2 2026 |
+| Canvas Expansion (1000×1000) | Planned | Q3 2026 |
 | AI Agent SDK | Planned | Q3 2026 |
 | Mainnet Launch | Planned | Q4 2026 |
 

@@ -7,7 +7,7 @@ description: "A real-time pixel conquest game with dynamic on-chain economy."
 
 **Pixel War** is a competitive multiplayer experiment that blends collaborative art with GameFi mechanics.
 
-Inspired by Reddit's [r/place](https://en.wikipedia.org/wiki/R/place)—the legendary collaborative canvas where millions competed for pixels—Pixel War takes the concept further by adding an **on-chain economy**. Every pixel is a tradable asset on a 64×36 grid, where communities coordinate, territories shift, and every conquest has real value.
+Inspired by Reddit's [r/place](https://en.wikipedia.org/wiki/R/place)—the legendary collaborative canvas where millions competed for pixels—Pixel War takes the concept further by adding an **on-chain economy**. Every pixel is a tradable asset on a **100×56 grid** (5,600 pixels), where communities coordinate, territories shift, and every conquest has real value.
 
 Looking ahead, Pixel War will integrate the **x402 protocol** to enable seamless HTTP-native payments, paving the way for **AI agents** to autonomously participate in the pixel economy. Imagine autonomous agents competing for territory, forming alliances, and executing complex trading strategies—all settled instantly on-chain. This is our vision for the **agentic economy**.
 
@@ -56,7 +56,36 @@ The game is driven by a simple, continuous economic cycle.
 
 *   **Real-time Synchronization**: Powered by **Supabase Realtime**, every pixel change propagates globally in under 500ms.
 *   **Batch Operations**: Select and conquer multiple pixels at once to draw patterns or secure territories.
+*   **Text Tool**: Convert text to pixel art with real-time preview, drag-and-drop positioning, and size scaling.
+*   **Free Recolor**: Recolor your owned pixels for free—no payment required.
 *   **Fair Protocol**: A transparent 10% platform fee ensures sustainability while guaranteeing player profit on every resale.
+
+## Text Tool
+
+The **Text Tool** is a powerful feature that lets you draw text on the canvas as pixel art.
+
+<Steps>
+  <Step title="Enter Text">
+    Type your message (supports A-Z uppercase letters)
+  </Step>
+  <Step title="Preview">
+    See a full canvas preview (100×56) with your text rendered as pixels
+  </Step>
+  <Step title="Position">
+    Drag to position, use +/- to scale, or click center button to auto-center
+  </Step>
+  <Step title="Draw">
+    Confirm and pay to draw your text on the canvas
+  </Step>
+</Steps>
+
+**Features**:
+- Full canvas preview with adaptive scaling
+- Compact color picker (recent + preset + custom HEX)
+- Input mode: Continuous text / Single letter
+- Purchase mode: Text only / Full cover (with background)
+- Smart boundary detection
+- USDC blue border indicator (doesn't cover text)
 
 ## Tech Stack
 
@@ -69,3 +98,4 @@ Built with the latest web standards for maximum performance.
 | **Backend** | Supabase (PostgreSQL + Realtime) |
 | **Blockchain** | Solana (SPL Token) |
 | **Styling** | Tailwind CSS + shadcn/ui |
+| **Rendering** | HTML Canvas (Text Tool preview) |

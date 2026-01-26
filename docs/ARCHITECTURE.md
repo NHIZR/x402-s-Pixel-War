@@ -205,13 +205,14 @@ components/
 │   ├── BatchConquerModal.tsx # 批量占领弹窗
 │   ├── TextToolModal.tsx  # 文字工具弹窗
 │   ├── TransactionPanel.tsx # 交易面板
-│   ├── ColorPicker.tsx    # 颜色选择器
+│   ├── ColorPicker.tsx    # 颜色选择器（紧凑水平布局）
 │   └── text-tool/         # 文字工具子组件
-│       ├── TextInput.tsx
-│       ├── ModeSelector.tsx
-│       ├── ColorSelector.tsx
-│       ├── PreviewCanvas.tsx
-│       └── PriceInfo.tsx
+│       ├── index.ts       # 导出入口
+│       ├── TextInput.tsx  # 文字输入框
+│       ├── ModeSelector.tsx # 模式选择器（内联紧凑版）
+│       ├── ColorSelector.tsx # 颜色选择区
+│       ├── PreviewCanvas.tsx # Canvas 预览（完整画布渲染）
+│       └── PriceInfo.tsx  # 价格信息显示
 ├── providers/
 │   └── SolanaWalletProvider.tsx # 钱包 Provider
 ├── ui/                     # 通用 UI 组件
