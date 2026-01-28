@@ -271,32 +271,31 @@ export function Grid() {
   return (
     <div className="flex flex-col items-center min-h-screen">
       {/* 页面顶部标题区域 */}
-      <div className="w-full text-center py-3" suppressHydrationWarning>
-        <h1 className="text-4xl font-black mb-2 bg-gradient-to-r from-white via-cyan-300 to-cyan-400 bg-clip-text text-transparent">
+      <div className="relative w-full text-center py-3 px-2" suppressHydrationWarning>
+        <h1 className="text-2xl sm:text-4xl font-black mb-2 bg-gradient-to-r from-white via-cyan-300 to-cyan-400 bg-clip-text text-transparent">
           {mounted ? t('title') : 'Pixel War'}
         </h1>
         {/* 第一行：操作说明 */}
-        <p className="text-sm text-gray-300 mb-1">
+        <p className="text-xs sm:text-sm text-gray-300 mb-1">
           {mounted ? (language === 'en' ? 'Pay' : '支付') : 'Pay'}{' '}
           <span className="text-cyan-400 font-semibold">USDC</span>{' '}
           {mounted ? (language === 'en' ? 'to conquer pixels, hold' : '占领像素，按住') : 'to conquer pixels, hold'}{' '}
-          <kbd className="px-1.5 py-0.5 bg-gray-800 border border-gray-600 rounded text-cyan-400 font-mono text-xs">Shift</kbd>
+          <kbd className="px-1 sm:px-1.5 py-0.5 bg-gray-800 border border-gray-600 rounded text-cyan-400 font-mono text-[10px] sm:text-xs">Shift</kbd>
           {' '}+ {mounted ? (language === 'en' ? 'drag to multi-select' : '拖动可多选') : 'drag to multi-select'}
         </p>
         {/* 第二行：价格信息 */}
-        <p className="text-sm text-gray-400">
+        <p className="text-xs sm:text-sm text-gray-400">
           {mounted ? (language === 'en' ? 'Starting price' : '起始价格') : 'Starting price'}{' '}
           <span className="text-cyan-400 font-semibold">0.01</span> USDC，
           {mounted ? (language === 'en' ? 'price increases' : '每次占领价格上涨') : 'price increases'}{' '}
           <span className="text-cyan-400 font-semibold">20%</span>{' '}
           {mounted ? (language === 'en' ? 'per conquest' : '') : 'per conquest'}
         </p>
-      </div>
 
       {/* 右上角按钮组 */}
-      <div className="fixed top-4 right-96 z-30 flex items-center gap-2" suppressHydrationWarning>
+      <div className="absolute top-0 right-0 z-30 flex items-center gap-1 sm:gap-2" suppressHydrationWarning>
         <button
-          className="px-4 py-2 bg-gray-900/90 hover:bg-gray-800 border border-gray-700 hover:border-cyan-400 rounded-lg text-sm font-medium transition-all hover:shadow-lg backdrop-blur-sm"
+          className="px-2 sm:px-4 py-1.5 sm:py-2 bg-gray-900/90 hover:bg-gray-800 border border-gray-700 hover:border-cyan-400 rounded-lg text-xs sm:text-sm font-medium transition-all hover:shadow-lg backdrop-blur-sm"
           onClick={toggleLanguage}
           title={mounted ? t('switchLanguage') : 'Switch Language'}
         >
@@ -306,7 +305,7 @@ export function Grid() {
           href="https://x402spixelwar.mintlify.app/introduction"
           target="_blank"
           rel="noopener noreferrer"
-          className="px-4 py-2 bg-gray-900/90 hover:bg-gray-800 border border-gray-700 hover:border-cyan-400 rounded-lg text-sm font-medium transition-all hover:shadow-lg backdrop-blur-sm"
+          className="px-2 sm:px-4 py-1.5 sm:py-2 bg-gray-900/90 hover:bg-gray-800 border border-gray-700 hover:border-cyan-400 rounded-lg text-xs sm:text-sm font-medium transition-all hover:shadow-lg backdrop-blur-sm"
         >
           {mounted ? t('docs') : 'Docs'}
         </a>
@@ -314,21 +313,22 @@ export function Grid() {
           href="https://github.com/NHIZR/x402-s-Pixel-War"
           target="_blank"
           rel="noopener noreferrer"
-          className="px-4 py-2 bg-gray-900/90 hover:bg-gray-800 border border-gray-700 hover:border-cyan-400 rounded-lg text-sm font-medium transition-all hover:shadow-lg backdrop-blur-sm"
+          className="px-2 sm:px-4 py-1.5 sm:py-2 bg-gray-900/90 hover:bg-gray-800 border border-gray-700 hover:border-cyan-400 rounded-lg text-xs sm:text-sm font-medium transition-all hover:shadow-lg backdrop-blur-sm"
         >
           GitHub
         </a>
       </div>
+      </div>
 
       {/* 像素网格容器 */}
-      <div className="relative w-full max-w-[1600px] mx-auto px-4">
+      <div className="relative w-full max-w-[1600px] mx-auto px-2 sm:px-4">
         {/* 像素网格 */}
         <div
           role="grid"
           aria-label="Pixel War Grid - 100x56 pixels"
           aria-rowcount={56}
           aria-colcount={100}
-          className="grid gap-0 bg-cyber-black p-3 rounded-lg border border-gray-800 w-full"
+          className="grid gap-0 bg-cyber-black p-1 sm:p-3 rounded-lg border border-gray-800 w-full"
           style={{
             gridTemplateColumns: 'repeat(100, minmax(0, 1fr))',
             aspectRatio: '100 / 56',
@@ -353,15 +353,15 @@ export function Grid() {
 
         {/* 文字购买像素悬浮按钮 - 位于像素图下方，在容器内 */}
         {connected && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
+          <div className="absolute bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 z-20">
             <button
-              className="px-5 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 border border-cyan-400/50 rounded-xl text-sm font-semibold transition-all shadow-lg hover:shadow-cyan-500/25 flex items-center gap-2 hover:scale-105 backdrop-blur-sm"
+              className="px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 border border-cyan-400/50 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-lg hover:shadow-cyan-500/25 flex items-center gap-1.5 sm:gap-2 hover:scale-105 backdrop-blur-sm"
               onClick={() => setShowTextTool(true)}
               suppressHydrationWarning
             >
-              <Type className="w-4 h-4" />
+              <Type className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>{mounted ? (language === 'en' ? 'Type Text to Conquer' : '输入文字占领像素') : 'Type Text to Conquer'}</span>
-              <Sparkles className="w-3 h-3 opacity-70" />
+              <Sparkles className="w-3 h-3 opacity-70 hidden sm:block" />
             </button>
           </div>
         )}
@@ -369,36 +369,38 @@ export function Grid() {
 
       {/* 多选工具栏 */}
       {selectedPixels.length > 0 && (
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-20">
-          <div className="flex items-center gap-4 px-6 py-3 bg-gray-900 rounded-lg border border-cyan-400 shadow-2xl">
+        <div className="fixed bottom-20 sm:bottom-8 left-1/2 -translate-x-1/2 z-20 w-[calc(100%-2rem)] sm:w-auto max-w-md sm:max-w-none">
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 px-4 sm:px-6 py-3 bg-gray-900 rounded-lg border border-cyan-400 shadow-2xl">
             <div className="text-sm" suppressHydrationWarning>
               <span className="text-cyan-400 font-bold">{selectedPixels.length}</span>
               <span className="text-gray-400 ml-1">{mounted ? t('pixelsSelected') : 'pixels selected'}</span>
             </div>
-            <div className="h-6 w-px bg-gray-700"></div>
-            <button
-              onClick={clearSelection}
-              className="px-4 py-1.5 text-sm bg-gray-800 hover:bg-gray-700 text-white rounded transition-colors"
-              suppressHydrationWarning
-            >
-              {mounted ? t('clearSelection') : 'Clear'}
-            </button>
-            <button
-              onClick={() => {
-                if (!connected) {
-                  toast.error(mounted ? t('connectWalletFirst') : 'Connect wallet first', {
-                    description: mounted ? t('needSolanaWalletBatch') : 'You need a Solana wallet'
-                  });
-                } else {
-                  setShowBatchModal(true);
-                }
-              }}
-              className="px-4 py-1.5 text-sm bg-cyan-600 hover:bg-cyan-500 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={!connected}
-              suppressHydrationWarning
-            >
-              {connected ? (mounted ? t('batchConquerBtn') : 'Batch Conquer') : (mounted ? t('needLogin') : 'Login Required')}
-            </button>
+            <div className="hidden sm:block h-6 w-px bg-gray-700"></div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={clearSelection}
+                className="px-3 sm:px-4 py-1.5 text-sm bg-gray-800 hover:bg-gray-700 text-white rounded transition-colors"
+                suppressHydrationWarning
+              >
+                {mounted ? t('clearSelection') : 'Clear'}
+              </button>
+              <button
+                onClick={() => {
+                  if (!connected) {
+                    toast.error(mounted ? t('connectWalletFirst') : 'Connect wallet first', {
+                      description: mounted ? t('needSolanaWalletBatch') : 'You need a Solana wallet'
+                    });
+                  } else {
+                    setShowBatchModal(true);
+                  }
+                }}
+                className="px-3 sm:px-4 py-1.5 text-sm bg-cyan-600 hover:bg-cyan-500 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!connected}
+                suppressHydrationWarning
+              >
+                {connected ? (mounted ? t('batchConquerBtn') : 'Batch Conquer') : (mounted ? t('needLogin') : 'Login Required')}
+              </button>
+            </div>
           </div>
         </div>
       )}
