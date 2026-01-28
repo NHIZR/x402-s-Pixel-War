@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useCallback, useEffect, useState, memo } from 'react';
+import { useRef, useCallback, useEffect, useState, memo, useMemo } from 'react';
 import { ZoomIn, ZoomOut, Hand, Maximize2 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
 import type { Pixel } from '@/lib/types/game.types';
@@ -51,11 +51,14 @@ function PreviewCanvasComponent({
   const isDraggingRef = useRef(false);
   const [containerWidth, setContainerWidth] = useState(800);
 
-  // 创建像素颜色查找表
-  const previewPixelMap = new Map<string, boolean>();
-  for (const p of previewPixels) {
-    previewPixelMap.set(`${p.x}-${p.y}`, p.isText);
-  }
+  // 创建像素颜色查找表（使用 useMemo 缓存）
+  const previewPixelMap = useMemo(() => {
+    const map = new Map<string, boolean>();
+    for (const p of previewPixels) {
+      map.set(`${p.x}-${p.y}`, p.isText);
+    }
+    return map;
+  }, [previewPixels]);
 
   // 监听容器宽度变化
   useEffect(() => {

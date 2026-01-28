@@ -201,28 +201,33 @@ export function Grid() {
   }, [selectedPixels]);
 
   // 使用 useCallback 包装事件处理器，避免每次渲染创建新函数
-  const handleMouseDown = useCallback((pixel: PixelType) => {
+  // 接收坐标而非 pixel 对象，避免在渲染时为每个像素创建闭包
+  const handleMouseDown = useCallback((x: number, y: number) => {
     if (isShiftPressedRef.current) {
       isDraggingRef.current = true;
-      togglePixelSelection(pixel);
+      const pixel = pixels[y]?.[x];
+      if (pixel) togglePixelSelection(pixel);
     }
-  }, [togglePixelSelection]);
+  }, [pixels, togglePixelSelection]);
 
-  const handleMouseEnter = useCallback((pixel: PixelType) => {
+  const handleMouseEnter = useCallback((x: number, y: number) => {
     if (isDraggingRef.current && isShiftPressedRef.current) {
-      if (!selectedPixelSet.has(`${pixel.x}-${pixel.y}`)) {
-        togglePixelSelection(pixel);
+      if (!selectedPixelSet.has(`${x}-${y}`)) {
+        const pixel = pixels[y]?.[x];
+        if (pixel) togglePixelSelection(pixel);
       }
     }
-  }, [togglePixelSelection, selectedPixelSet]);
+  }, [pixels, togglePixelSelection, selectedPixelSet]);
 
-  const handlePixelClick = useCallback((pixel: PixelType) => {
-    selectPixel(pixel);
-  }, [selectPixel]);
+  const handlePixelClick = useCallback((x: number, y: number) => {
+    const pixel = pixels[y]?.[x];
+    if (pixel) selectPixel(pixel);
+  }, [pixels, selectPixel]);
 
-  const handlePixelShiftClick = useCallback((pixel: PixelType) => {
-    togglePixelSelection(pixel);
-  }, [togglePixelSelection]);
+  const handlePixelShiftClick = useCallback((x: number, y: number) => {
+    const pixel = pixels[y]?.[x];
+    if (pixel) togglePixelSelection(pixel);
+  }, [pixels, togglePixelSelection]);
 
   // 监听全局鼠标释放事件
   useEffect(() => {
@@ -342,10 +347,10 @@ export function Grid() {
               pixel={pixel}
               isFlashing={flashingPixels.has(`${x}-${y}`)}
               isSelected={selectedPixelSet.has(`${x}-${y}`)}
-              onClick={() => handlePixelClick(pixel)}
-              onShiftClick={() => handlePixelShiftClick(pixel)}
-              onMouseDown={() => handleMouseDown(pixel)}
-              onMouseEnter={() => handleMouseEnter(pixel)}
+              onPixelClick={handlePixelClick}
+              onPixelShiftClick={handlePixelShiftClick}
+              onPixelMouseDown={handleMouseDown}
+              onPixelMouseEnter={handleMouseEnter}
             />
           ))
         )}

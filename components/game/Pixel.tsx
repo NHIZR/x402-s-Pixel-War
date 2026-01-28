@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import type { Pixel as PixelType } from '@/lib/types/game.types';
 
@@ -8,56 +8,66 @@ interface PixelProps {
   pixel: PixelType;
   isFlashing: boolean;
   isSelected?: boolean;
-  onClick: () => void;
-  onShiftClick?: () => void;
-  onMouseDown?: () => void;
-  onMouseEnter?: () => void;
+  onPixelClick: (x: number, y: number) => void;
+  onPixelShiftClick: (x: number, y: number) => void;
+  onPixelMouseDown: (x: number, y: number) => void;
+  onPixelMouseEnter: (x: number, y: number) => void;
 }
 
-function PixelComponent({ pixel, isFlashing, isSelected = false, onClick, onShiftClick, onMouseDown, onMouseEnter }: PixelProps) {
+function PixelComponent({
+  pixel,
+  isFlashing,
+  isSelected = false,
+  onPixelClick,
+  onPixelShiftClick,
+  onPixelMouseDown,
+  onPixelMouseEnter
+}: PixelProps) {
+  const { x, y, color, currentPrice, ownerId } = pixel;
+
   const handleClick = useCallback((e: React.MouseEvent) => {
-    if (e.shiftKey && onShiftClick) {
-      onShiftClick();
+    if (e.shiftKey) {
+      onPixelShiftClick(x, y);
     } else {
-      onClick();
+      onPixelClick(x, y);
     }
-  }, [onClick, onShiftClick]);
+  }, [x, y, onPixelClick, onPixelShiftClick]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    onMouseDown?.();
-  }, [onMouseDown]);
+    onPixelMouseDown(x, y);
+  }, [x, y, onPixelMouseDown]);
 
   const handleMouseEnter = useCallback(() => {
-    onMouseEnter?.();
-  }, [onMouseEnter]);
+    onPixelMouseEnter(x, y);
+  }, [x, y, onPixelMouseEnter]);
 
   // 键盘导航支持
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      if (e.shiftKey && onShiftClick) {
-        onShiftClick();
+      if (e.shiftKey) {
+        onPixelShiftClick(x, y);
       } else {
-        onClick();
+        onPixelClick(x, y);
       }
     }
-  }, [onClick, onShiftClick]);
+  }, [x, y, onPixelClick, onPixelShiftClick]);
 
   // 格式化价格显示
-  const priceDisplay = pixel.currentPrice.toFixed(2);
-  const ownerStatus = pixel.ownerId ? 'Owned' : 'Available';
+  const priceDisplay = currentPrice.toFixed(2);
+  const ownerStatus = ownerId ? 'Owned' : 'Available';
 
-  // 判断是否是深色像素（需要浅色边框）
-  const isLightPixel = () => {
-    const hex = pixel.color.replace('#', '');
+  // 判断是否是浅色像素（使用 useMemo 缓存计算结果）
+  const isLightPixel = useMemo(() => {
+    const hex = color.replace('#', '');
     if (hex.length !== 6) return false;
     const r = parseInt(hex.substring(0, 2), 16);
     const g = parseInt(hex.substring(2, 4), 16);
     const b = parseInt(hex.substring(4, 6), 16);
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
     return luminance > 0.5;
-  };
+  }, [color]);
 
   return (
     <button
@@ -73,17 +83,17 @@ function PixelComponent({ pixel, isFlashing, isSelected = false, onClick, onShif
         'border-[0.5px]',
         isSelected
           ? 'border-cyan-400 border-[1.5px] z-10 brightness-110'
-          : isLightPixel() ? 'border-gray-600/40' : 'border-gray-500/20'
+          : isLightPixel ? 'border-gray-600/40' : 'border-gray-500/20'
       )}
       style={{
-        backgroundColor: pixel.color,
+        backgroundColor: color,
       }}
       onClick={handleClick}
       onMouseDown={handleMouseDown}
       onMouseEnter={handleMouseEnter}
       onKeyDown={handleKeyDown}
-      title={`(${pixel.x}, ${pixel.y}) - ${priceDisplay} USDC${isSelected ? ' [Selected]' : ''}`}
-      aria-label={`Pixel at position ${pixel.x}, ${pixel.y}. Price: ${priceDisplay} USDC. Status: ${ownerStatus}${isSelected ? '. Currently selected' : ''}`}
+      title={`(${x}, ${y}) - ${priceDisplay} USDC${isSelected ? ' [Selected]' : ''}`}
+      aria-label={`Pixel at position ${x}, ${y}. Price: ${priceDisplay} USDC. Status: ${ownerStatus}${isSelected ? '. Currently selected' : ''}`}
       aria-selected={isSelected}
       tabIndex={0}
       draggable={false}
@@ -94,6 +104,7 @@ function PixelComponent({ pixel, isFlashing, isSelected = false, onClick, onShif
 // Memoize to prevent unnecessary re-renders
 export const Pixel = memo(PixelComponent, (prevProps, nextProps) => {
   // Only re-render if these specific props change
+  // Note: callback functions are stable references from Grid, so we don't need to compare them
   return (
     prevProps.pixel.color === nextProps.pixel.color &&
     prevProps.pixel.currentPrice === nextProps.pixel.currentPrice &&
