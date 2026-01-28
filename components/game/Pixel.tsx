@@ -70,12 +70,10 @@ function PixelComponent({ pixel, isFlashing, isSelected = false, onClick, onShif
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:z-20',
         'select-none',
         isFlashing && 'animate-flash',
+        'border-[0.5px]',
         isSelected
-          ? 'ring-2 ring-cyan-400 ring-offset-1 ring-offset-gray-900 z-10 brightness-110'
-          : [
-              'border-[0.5px]',
-              isLightPixel() ? 'border-gray-600/40' : 'border-gray-500/20'
-            ]
+          ? 'border-cyan-400 border-[1.5px] z-10 brightness-110'
+          : isLightPixel() ? 'border-gray-600/40' : 'border-gray-500/20'
       )}
       style={{
         backgroundColor: pixel.color,
