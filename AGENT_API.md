@@ -216,6 +216,10 @@ curl "https://pixel-war-ashy.vercel.app/api/pixels/info?all=true"
 
 **Rate Limit**: 10 requests per minute per wallet
 
+**Processing Modes**:
+- **Sync Mode**: For ≤5 pixels, returns result immediately
+- **Async Mode**: For >5 pixels (or `async: true`), returns `jobId` for polling
+
 **Request Body**:
 ```json
 {
@@ -224,7 +228,8 @@ curl "https://pixel-war-ashy.vercel.app/api/pixels/info?all=true"
     {"x": 0, "y": 0, "color": "#FF0000"},
     {"x": 1, "y": 0, "color": "#00FF00"},
     {"x": 2, "y": 0, "color": "#0000FF"}
-  ]
+  ],
+  "async": false
 }
 ```
 
@@ -235,8 +240,9 @@ curl "https://pixel-war-ashy.vercel.app/api/pixels/info?all=true"
 | pixels[].x | number | Yes | X coordinate (0-99) |
 | pixels[].y | number | Yes | Y coordinate (0-99) |
 | pixels[].color | string | Yes | Hex color code (#RRGGBB) |
+| async | boolean | No | Force async mode (default: auto based on pixel count) |
 
-**Example Request**:
+**Example Request (Sync - small batch)**:
 ```bash
 curl -X POST "https://pixel-war-ashy.vercel.app/api/pixels/conquer" \
   -H "Content-Type: application/json" \
@@ -276,9 +282,119 @@ curl -X POST "https://pixel-war-ashy.vercel.app/api/pixels/conquer" \
 }
 ```
 
+#### Async Mode (for large batches)
+
+For >5 pixels or when `async: true`, the API returns immediately with a `jobId`:
+
+**Async Response (HTTP 202)**:
+```json
+{
+  "success": true,
+  "async": true,
+  "jobId": "job_1234567890_abc123",
+  "walletAddress": "9GJhxdWqx9RbAGfpwMpzge5tUTBGwbx24NTGEBuuRTbC",
+  "totalPixels": 20,
+  "estimatedPrice": 0.2,
+  "message": "Job created. Poll /api/pixels/job?id=job_1234567890_abc123 for status.",
+  "pollUrl": "/api/pixels/job?id=job_1234567890_abc123"
+}
+```
+
+Then poll the job status endpoint (see below).
+
 ---
 
-### 4. Request Test USDC (Faucet)
+### 4. Check Job Status
+
+**Endpoint**: `GET /api/pixels/job`
+
+Use this to check the status of async conquest jobs.
+
+**Query Parameters**:
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| id | string | Yes | Job ID returned from async conquest |
+
+**Example**:
+```bash
+curl "https://pixel-war-ashy.vercel.app/api/pixels/job?id=job_1234567890_abc123"
+```
+
+**Job Statuses**:
+| Status | Description |
+|--------|-------------|
+| pending | Job is queued, waiting to process |
+| processing | Job is currently running |
+| completed | Job finished successfully |
+| failed | Job failed with error |
+
+**Pending/Processing Response**:
+```json
+{
+  "success": true,
+  "jobId": "job_1234567890_abc123",
+  "status": "processing",
+  "walletAddress": "9GJhxdWqx9RbAGfpwMpzge5tUTBGwbx24NTGEBuuRTbC",
+  "totalPixels": 20,
+  "estimatedPrice": 0.2,
+  "message": "Job is currently being processed. This may take up to 60 seconds.",
+  "retryAfter": 5
+}
+```
+
+**Completed Response**:
+```json
+{
+  "success": true,
+  "jobId": "job_1234567890_abc123",
+  "status": "completed",
+  "result": {
+    "success": true,
+    "txHash": "5Ky8...",
+    "totalPixels": 20,
+    "successCount": 20,
+    "totalPaid": 0.2,
+    "explorerUrl": "https://explorer.solana.com/tx/5Ky8...?cluster=devnet"
+  }
+}
+```
+
+**Polling Example (Python)**:
+```python
+import time
+import requests
+
+BASE_URL = "https://pixel-war-ashy.vercel.app"
+
+# Submit large batch (async)
+response = requests.post(f"{BASE_URL}/api/pixels/conquer", json={
+    "privateKey": "YOUR_KEY",
+    "pixels": [{"x": i, "y": 0, "color": "#FF0000"} for i in range(20)]
+})
+data = response.json()
+
+if data.get("async"):
+    job_id = data["jobId"]
+    print(f"Job submitted: {job_id}")
+
+    # Poll for result
+    while True:
+        status = requests.get(f"{BASE_URL}/api/pixels/job?id={job_id}").json()
+        print(f"Status: {status['status']}")
+
+        if status["status"] == "completed":
+            print(f"Success! TX: {status['result']['txHash']}")
+            break
+        elif status["status"] == "failed":
+            print(f"Failed: {status['result']['error']}")
+            break
+
+        time.sleep(status.get("retryAfter", 5))
+```
+
+---
+
+### 5. Request Test USDC (Faucet)
 
 **Endpoint**: `POST /api/faucet`
 
