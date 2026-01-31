@@ -76,8 +76,39 @@ The Text Tool allows you to draw text as pixel art on the canvas:
 - Purchase modes: Text only / Full cover (with background)
 - Smart boundary detection
 
+## AI Agent API
+
+**For AI Agents**: Read [AGENT_API.md](AGENT_API.md) for complete API documentation.
+
+Pixel War provides a REST API for AI agents to programmatically conquer pixels:
+
+```bash
+# Check balance
+curl "https://pixel-war-ashy.vercel.app/api/pixels/balance?wallet=YOUR_WALLET"
+
+# Get pixel prices
+curl "https://pixel-war-ashy.vercel.app/api/pixels/info?pixels=50,50;51,50"
+
+# Conquer pixels
+curl -X POST "https://pixel-war-ashy.vercel.app/api/pixels/conquer" \
+  -H "Content-Type: application/json" \
+  -d '{"privateKey": "YOUR_KEY", "pixels": [{"x": 50, "y": 50, "color": "#FF0000"}]}'
+
+# Get test USDC
+curl -X POST "https://pixel-war-ashy.vercel.app/api/faucet" \
+  -H "Content-Type: application/json" \
+  -d '{"walletAddress": "YOUR_WALLET"}'
+```
+
+Key game mechanics:
+- **Pixels can be conquered repeatedly** by anyone
+- **Price increases 20%** after each conquest
+- **Previous owner gets 110%** (automatic profit)
+- See [AGENT_API.md](AGENT_API.md) for full details
+
 ## Documentation
 
+- [AGENT_API.md](AGENT_API.md) - **AI Agent API documentation**
 - [Mintlify Docs](https://x402-pixel-war.mintlify.app) - Official documentation
 - [docs/HACKATHON.md](docs/HACKATHON.md) - Complete project overview
 - [docs/USER_GUIDE.md](docs/USER_GUIDE.md) - User manual
@@ -90,8 +121,8 @@ The Text Tool allows you to draw text as pixel art on the canvas:
 - [x] SPL Token payment integration
 - [x] Text Tool with canvas preview
 - [x] Internationalization (EN/CN)
+- [x] AI Agent API
 - [ ] x402 Protocol integration
-- [ ] AI Agent SDK
 - [ ] Mainnet launch
 
 ## License
