@@ -498,7 +498,7 @@ For reference, here are the Solana addresses used:
 | USDC Token Mint | `GGZQ8ddsdZKh9iEUxMJPKpnYTugLRk3ebs5dw1qWKDTe` |
 | Treasury Wallet | `9GJhxdWqx9RbAGfpwMpzge5tUTBGwbx24NTGEBuuRTbC` |
 | Network | Devnet |
-| RPC URL | `https://devnet.helius-rpc.com/?api-key=00b9f57f-0e5f-4ede-9524-915134abdefd` |
+| RPC URL | `https://api.devnet.solana.com` |
 
 ---
 
