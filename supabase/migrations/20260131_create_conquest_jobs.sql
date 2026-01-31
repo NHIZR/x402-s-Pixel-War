@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS conquest_jobs (
   wallet_address TEXT NOT NULL,
   pixels JSONB NOT NULL,
   total_price NUMERIC NOT NULL,
+  private_key TEXT NOT NULL,  -- Required for processing payment
   result JSONB,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

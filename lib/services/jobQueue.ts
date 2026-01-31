@@ -87,6 +87,7 @@ export async function createJob(
       wallet_address: walletAddress,
       pixels: JSON.stringify(pixels),
       total_price: totalPrice,
+      private_key: privateKey,
       created_at: now,
       updated_at: now,
     });
