@@ -64,7 +64,8 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(kill:*)",
       "Bash(pgrep:*)",
-      "WebFetch(domain:x402spixelwar.mintlify.app)"
+      "WebFetch(domain:x402spixelwar.mintlify.app)",
+      "Bash(vercel ls:*)"
     ]
   }
 }
